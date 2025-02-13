@@ -10,7 +10,7 @@ import playerRoutes from "./routes/playerRoutes.js";
 import matchRoutes from "./routes/matchRoutes.js";
 import articleRoutes from "./routes/articleRoutes.js";
 import statsRoutes from "./routes/statsRoutes.js";
-import uploadRoutes from "./routes/uploadRoutes.js";
+import imageRoutes from "./routes/imageRoutes.js";
 
 // Load Environment Variables
 dotenv.config();
@@ -29,6 +29,6 @@ app.use("/api/players", playerRoutes);
 app.use("/api/matches", matchRoutes);
 app.use("/api/articles", articleRoutes);
 app.use("/api/stats", statsRoutes);
-app.use("/api/upload", uploadRoutes);
+app.use("/api/image", imageRoutes);
 
 export default app;

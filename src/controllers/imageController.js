@@ -25,3 +25,22 @@ export const uploadPhoto = async (req, res) => {
     res.status(500).json({ message: "Error uploading image", error });
   }
 };
+
+// ✅ Delete Image from Firebase
+export const deletePhoto = async (req, res) => {
+  try {
+    const { fileName } = req.body; // Get file name from request
+
+    if (!fileName) {
+      return res.status(400).json({ message: "File name is required" });
+    }
+
+    const file = bucket.file(fileName);
+    await file.delete();
+
+    res.status(200).json({ message: "Image deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting image:", error);
+    res.status(500).json({ message: "Error deleting image", error });
+  }
+};

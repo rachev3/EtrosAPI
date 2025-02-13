@@ -1,42 +1,44 @@
-import bucket from "../config/firebase.js";
+import cloudinary from "../config/cloudinary.js";
 
+// ✅ Upload Image to Cloudinary
 export const uploadPhoto = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    const fileName = `articles/${Date.now()}_${req.file.originalname}`;
-    const fileUpload = bucket.file(fileName);
+    // Upload to Cloudinary
+    cloudinary.uploader
+      .upload_stream(
+        { folder: "articles" }, // Save in Cloudinary "articles" folder
+        (error, result) => {
+          if (error)
+            return res.status(500).json({ message: "Upload failed", error });
 
-    await fileUpload.save(req.file.buffer, {
-      metadata: { contentType: req.file.mimetype },
-    });
-
-    // Generate a public URL
-    const [url] = await fileUpload.getSignedUrl({
-      action: "read",
-      expires: "03-01-2030", // Expiry date for URL access
-    });
-
-    res.status(201).json({ imageUrl: url });
+          res.status(201).json({
+            message: "Image uploaded successfully",
+            imageUrl: result.secure_url,
+            fileName: result.public_id, // Save this to delete later
+          });
+        }
+      )
+      .end(req.file.buffer);
   } catch (error) {
     console.error("Error uploading image:", error);
     res.status(500).json({ message: "Error uploading image", error });
   }
 };
 
-// ✅ Delete Image from Firebase
+// ✅ Delete Image from Cloudinary
 export const deletePhoto = async (req, res) => {
   try {
-    const { fileName } = req.body; // Get file name from request
+    const { fileName } = req.body;
 
     if (!fileName) {
       return res.status(400).json({ message: "File name is required" });
     }
 
-    const file = bucket.file(fileName);
-    await file.delete();
+    await cloudinary.uploader.destroy(fileName);
 
     res.status(200).json({ message: "Image deleted successfully" });
   } catch (error) {

@@ -11,6 +11,7 @@ import matchRoutes from "./routes/matchRoutes.js";
 import articleRoutes from "./routes/articleRoutes.js";
 import statsRoutes from "./routes/statsRoutes.js";
 import imageRoutes from "./routes/imageRoutes.js";
+import setupSwagger from "./config/swagger.js";
 
 // Load Environment Variables
 dotenv.config();
@@ -22,6 +23,9 @@ app.use(express.json());
 app.use(cors());
 app.use(helmet());
 app.use(morgan("dev"));
+
+// Setup Swagger Docs
+setupSwagger(app);
 
 // Routes
 app.use("/api/auth", authRoutes);

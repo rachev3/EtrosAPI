@@ -1,0 +1,15 @@
+# Ignore environment variables
+.env
+
+# Ignore node_modules (reduces repo size)
+node_modules/
+
+# Ignore build files
+/dist
+/build
+
+# Ignore log files
+*.log
+
+# Ignore firebase key
+/src/config/firebase-key.json

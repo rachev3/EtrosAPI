@@ -5,9 +5,9 @@ import { uploadPhoto, deletePhoto } from "../controllers/imageController.js";
 const router = express.Router();
 
 // ✅ Upload Image Route
-router.post("/upload", upload.single("image"), uploadPhoto);
+router.post("/upload", protect, isAdmin, upload.single("image"), uploadPhoto);
 
-// ✅ Delete Image Route
-router.delete("/delete", deletePhoto);
+// ✅ Only authenticated admins can delete images
+router.delete("/delete", protect, isAdmin, deletePhoto);
 
 export default router;

@@ -9,22 +9,21 @@ export const uploadPhoto = async (req, res) => {
 
     // Upload to Cloudinary
     cloudinary.uploader
-      .upload_stream(
-        { folder: "articles" }, // Save in Cloudinary "articles" folder
-        (error, result) => {
-          if (error)
-            return res.status(500).json({ message: "Upload failed", error });
-
-          res.status(201).json({
-            message: "Image uploaded successfully",
-            imageUrl: result.secure_url,
-            fileName: result.public_id, // Save this to delete later
-          });
+      .upload_stream({ folder: "articles" }, (error, result) => {
+        if (error) {
+          console.error("Cloudinary Upload Error:", error); // ✅ Log the error
+          return res.status(500).json({ message: "Upload failed", error });
         }
-      )
+
+        res.status(201).json({
+          message: "Image uploaded successfully",
+          imageUrl: result.secure_url,
+          fileName: result.public_id,
+        });
+      })
       .end(req.file.buffer);
   } catch (error) {
-    console.error("Error uploading image:", error);
+    console.error("Error uploading image:", error); // ✅ Log other errors
     res.status(500).json({ message: "Error uploading image", error });
   }
 };

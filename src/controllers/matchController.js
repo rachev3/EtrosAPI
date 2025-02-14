@@ -26,20 +26,61 @@ export const getMatch = async (req, res) => {
 // **3️⃣ Create a New Match (Admin Only)**
 export const createMatch = async (req, res) => {
   try {
-    const { opponent, date, venue, result, score } = req.body;
+    const {
+      opponent,
+      date,
+      location,
+      ourScore,
+      opponentScore,
+      teamStats,
+      playerStats,
+    } = req.body;
 
+    // Determine result based on provided scores
+    let result = "Pending";
+    if (ourScore !== null && opponentScore !== null) {
+      result =
+        ourScore > opponentScore
+          ? "Win"
+          : ourScore < opponentScore
+          ? "Loss"
+          : "Pending";
+    }
+
+    // Ensure `teamStats` is properly structured or use default values
+    const defaultTeamStats = {
+      fieldGoalsMade: 0,
+      fieldgoalsAttempted: 0,
+      twoPointsMade: 0,
+      twoPointsAttempted: 0,
+      threePointsMade: 0,
+      threePointsAttempted: 0,
+      freeThrowsMade: 0,
+      freeThrowsAttempted: 0,
+      offensiveRebounds: 0,
+      defensiveRebounds: 0,
+      totalAssists: 0,
+      totalSteals: 0,
+      totalBlocks: 0,
+      totalTurnovers: 0,
+      totalFouls: 0,
+      totalPoints: 0,
+    };
+
+    // Merge provided `teamStats` with defaults (if missing fields)
+    const finalTeamStats = { ...defaultTeamStats, ...teamStats };
+
+    // Create match
     const newMatch = await Match.create({
       opponent,
       date,
-      venue,
+      location,
       result,
-      score,
+      ourScore: ourScore || null,
+      opponentScore: opponentScore || null,
+      teamStats: finalTeamStats,
+      playerStats: playerStats || [],
     });
-
-    // **Update Team Stats**
-    if (result !== "Pending") {
-      await updateStatsAfterMatch(newMatch);
-    }
 
     res.status(201).json(newMatch);
   } catch (error) {

@@ -11,6 +11,8 @@ import matchRoutes from "./routes/matchRoutes.js";
 import articleRoutes from "./routes/articleRoutes.js";
 import statsRoutes from "./routes/statsRoutes.js";
 import imageRoutes from "./routes/imageRoutes.js";
+import playerStatsRoutes from "./routes/playerStatsRoutes.js";
+
 import setupSwagger from "./config/swagger.js";
 
 // Load Environment Variables
@@ -34,5 +36,6 @@ app.use("/api/matches", matchRoutes);
 app.use("/api/articles", articleRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/image", imageRoutes);
+app.use("/api/player-stats", playerStatsRoutes);
 
 export default app;

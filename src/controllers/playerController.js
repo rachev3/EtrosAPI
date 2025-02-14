@@ -26,7 +26,7 @@ export const getPlayer = async (req, res) => {
 // **3️⃣ Create a New Player (Admin Only)**
 export const createPlayer = async (req, res) => {
   try {
-    const { name, position, height, weight, stats } = req.body;
+    const { name, position, height, weight, stats, bornYear } = req.body;
 
     // Check if player already exists
     const playerExists = await Player.findOne({ name });
@@ -37,6 +37,7 @@ export const createPlayer = async (req, res) => {
     // Create new player
     const newPlayer = await Player.create({
       name,
+      bornYear,
       position,
       height,
       weight,

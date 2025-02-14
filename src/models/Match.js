@@ -16,7 +16,7 @@ const matchSchema = new mongoose.Schema(
     // ✅ Store aggregated team stats
     teamStats: {
       fieldGoalsMade: { type: Number, default: 0 },
-      fieldgoalsAttempted: { type: Number, default: 0 },
+      fieldGoalsAttempted: { type: Number, default: 0 },
       twoPointsMade: { type: Number, default: 0 },
       twoPointsAttempted: { type: Number, default: 0 },
       threePointsMade: { type: Number, default: 0 },

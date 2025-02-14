@@ -12,6 +12,49 @@ const router = express.Router();
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Player:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           example: 60d0fe4f5311236168a109ca
+ *         name:
+ *           type: string
+ *           example: "John Doe"
+ *         bornYear:
+ *           type: number
+ *           example: 1995
+ *         position:
+ *           type: array
+ *           items:
+ *             type: string
+ *           example: ["PointGuard", "ShootingGuard"]
+ *         height:
+ *           type: string
+ *           example: "6'3"
+ *         weight:
+ *           type: number
+ *           example: 190
+ *         imageUrl:
+ *           type: string
+ *           example: "https://example.com/image.jpg"
+ *         statsHistory:
+ *           type: array
+ *           items:
+ *             type: string
+ *           example: ["65ffb6a88cd740bb1c6e3f25", "65ffb6a88cd740bb1c6e3f26"]
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ */
+
+/**
+ * @swagger
  * /api/players:
  *   get:
  *     summary: Get all players
@@ -24,21 +67,11 @@ const router = express.Router();
  *             schema:
  *               type: array
  *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: string
- *                     example: 60d0fe4f5311236168a109ca
- *                   name:
- *                     type: string
- *                     example: Player Name
- *                   position:
- *                     type: string
- *                     example: Forward
+ *                 $ref: '#/components/schemas/Player'
  *       500:
  *         description: Server error
  */
-router.get("/", getPlayers); // Get all players
+router.get("/", getPlayers);
 
 /**
  * @swagger
@@ -59,39 +92,13 @@ router.get("/", getPlayers); // Get all players
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                   example: 60d0fe4f5311236168a109ca
- *                 name:
- *                   type: string
- *                   example: Player Name
- *                 position:
- *                   type: string
- *                   example: Forward
+ *               $ref: '#/components/schemas/Player'
  *       404:
  *         description: Player not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Player not found
  *       500:
  *         description: Server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Internal server error
  */
-router.get("/:id", getPlayer); // Get single player
+router.get("/:id", getPlayer);
 
 /**
  * @swagger
@@ -109,53 +116,42 @@ router.get("/:id", getPlayer); // Get single player
  *             type: object
  *             required:
  *               - name
+ *               - bornYear
  *               - position
  *             properties:
  *               name:
  *                 type: string
- *                 example: New Player
+ *                 example: "John Doe"
+ *               bornYear:
+ *                 type: number
+ *                 example: 1995
  *               position:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["PointGuard", "ShootingGuard"]
+ *               height:
  *                 type: string
- *                 example: Forward
+ *                 example: "6'3"
+ *               weight:
+ *                 type: number
+ *                 example: 190
+ *               imageUrl:
+ *                 type: string
+ *                 example: "https://example.com/image.jpg"
  *     responses:
  *       201:
  *         description: Player created successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                   example: 60d0fe4f5311236168a109ca
- *                 name:
- *                   type: string
- *                   example: New Player
- *                 position:
- *                   type: string
- *                   example: Forward
+ *               $ref: '#/components/schemas/Player'
  *       400:
- *         description: Bad request
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Invalid request data
+ *         description: Bad request (missing required fields or duplicate name)
  *       500:
  *         description: Server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Internal server error
  */
-router.post("/", protect, isAdmin, createPlayer); // Add player (Admin only)
+router.post("/", protect, isAdmin, createPlayer);
 
 /**
  * @swagger
@@ -177,53 +173,16 @@ router.post("/", protect, isAdmin, createPlayer); // Add player (Admin only)
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 example: Updated Player Name
- *               position:
- *                 type: string
- *                 example: Midfielder
+ *             $ref: '#/components/schemas/Player'
  *     responses:
  *       200:
  *         description: Player updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                   example: 60d0fe4f5311236168a109ca
- *                 name:
- *                   type: string
- *                   example: Updated Player Name
- *                 position:
- *                   type: string
- *                   example: Midfielder
  *       404:
  *         description: Player not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Player not found
  *       500:
  *         description: Server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Internal server error
  */
-router.put("/:id", protect, isAdmin, updatePlayer); // Update player (Admin only)
+router.put("/:id", protect, isAdmin, updatePlayer);
 
 /**
  * @swagger
@@ -243,35 +202,11 @@ router.put("/:id", protect, isAdmin, updatePlayer); // Update player (Admin only
  *     responses:
  *       200:
  *         description: Player deleted successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Player deleted successfully
  *       404:
  *         description: Player not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Player not found
  *       500:
  *         description: Server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Internal server error
  */
-router.delete("/:id", protect, isAdmin, deletePlayer); // Delete player (Admin only)
+router.delete("/:id", protect, isAdmin, deletePlayer);
 
 export default router;

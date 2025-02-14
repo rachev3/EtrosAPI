@@ -12,6 +12,94 @@ const router = express.Router();
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Match:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           example: 60d0fe4f5311236168a109ca
+ *         opponent:
+ *           type: string
+ *           example: "Team X"
+ *         date:
+ *           type: string
+ *           format: date-time
+ *           example: 2025-02-14T00:00:00.000Z
+ *         location:
+ *           type: string
+ *           example: "Home"
+ *         result:
+ *           type: string
+ *           enum: [Win, Loss, Pending]
+ *           example: "Win"
+ *         ourScore:
+ *           type: number
+ *           example: 90
+ *         opponentScore:
+ *           type: number
+ *           example: 85
+ *         teamStats:
+ *           type: object
+ *           properties:
+ *             fieldGoalsMade:
+ *               type: number
+ *               example: 35
+ *             fieldGoalsAttempted:
+ *               type: number
+ *               example: 70
+ *             threePointsMade:
+ *               type: number
+ *               example: 10
+ *             threePointsAttempted:
+ *               type: number
+ *               example: 25
+ *             freeThrowsMade:
+ *               type: number
+ *               example: 10
+ *             freeThrowsAttempted:
+ *               type: number
+ *               example: 12
+ *             offensiveRebounds:
+ *               type: number
+ *               example: 10
+ *             defensiveRebounds:
+ *               type: number
+ *               example: 25
+ *             totalAssists:
+ *               type: number
+ *               example: 22
+ *             totalSteals:
+ *               type: number
+ *               example: 6
+ *             totalBlocks:
+ *               type: number
+ *               example: 5
+ *             totalTurnovers:
+ *               type: number
+ *               example: 11
+ *             totalFouls:
+ *               type: number
+ *               example: 14
+ *             totalPoints:
+ *               type: number
+ *               example: 90
+ *         playerStats:
+ *           type: array
+ *           items:
+ *             type: string
+ *           example: ["65ffb6a88cd740bb1c6e3f25", "65ffb6a88cd740bb1c6e3f26"]
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ */
+
+/**
+ * @swagger
  * /api/matches:
  *   get:
  *     summary: Get all matches
@@ -24,22 +112,11 @@ const router = express.Router();
  *             schema:
  *               type: array
  *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: string
- *                     example: 60d0fe4f5311236168a109ca
- *                   title:
- *                     type: string
- *                     example: Match Title
- *                   date:
- *                     type: string
- *                     format: date-time
- *                     example: 2025-02-14T00:00:00.000Z
+ *                 $ref: '#/components/schemas/Match'
  *       500:
  *         description: Server error
  */
-router.get("/", getMatches); // Get all matches
+router.get("/", getMatches);
 
 /**
  * @swagger
@@ -60,24 +137,13 @@ router.get("/", getMatches); // Get all matches
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                   example: 60d0fe4f5311236168a109ca
- *                 title:
- *                   type: string
- *                   example: Match Title
- *                 date:
- *                   type: string
- *                   format: date-time
- *                   example: 2025-02-14T00:00:00.000Z
+ *               $ref: '#/components/schemas/Match'
  *       404:
  *         description: Match not found
  *       500:
  *         description: Server error
  */
-router.get("/:id", getMatch); // Get single match
+router.get("/:id", getMatch);
 
 /**
  * @swagger
@@ -94,56 +160,46 @@ router.get("/:id", getMatch); // Get single match
  *           schema:
  *             type: object
  *             required:
- *               - title
+ *               - opponent
  *               - date
+ *               - location
  *             properties:
- *               title:
+ *               opponent:
  *                 type: string
- *                 example: New Match
+ *                 example: "Team X"
  *               date:
  *                 type: string
  *                 format: date-time
- *                 example: 2025-02-14T00:00:00.000Z
+ *                 example: "2025-02-14T00:00:00.000Z"
+ *               location:
+ *                 type: string
+ *                 example: "Home"
+ *               ourScore:
+ *                 type: number
+ *                 example: 90
+ *               opponentScore:
+ *                 type: number
+ *                 example: 85
+ *               teamStats:
+ *                 $ref: '#/components/schemas/Match/properties/teamStats'
+ *               playerStats:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["65ffb6a88cd740bb1c6e3f25"]
  *     responses:
  *       201:
  *         description: Match created successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                   example: 60d0fe4f5311236168a109ca
- *                 title:
- *                   type: string
- *                   example: New Match
- *                 date:
- *                   type: string
- *                   format: date-time
- *                   example: 2025-02-14T00:00:00.000Z
+ *               $ref: '#/components/schemas/Match'
  *       400:
  *         description: Bad request
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Invalid request data
  *       500:
  *         description: Server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Internal server error
  */
-router.post("/", protect, isAdmin, createMatch); // Add match (Admin only)
+router.post("/", protect, isAdmin, createMatch);
 
 /**
  * @swagger
@@ -165,55 +221,16 @@ router.post("/", protect, isAdmin, createMatch); // Add match (Admin only)
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               title:
- *                 type: string
- *                 example: Updated Match Title
- *               date:
- *                 type: string
- *                 format: date-time
- *                 example: 2025-02-14T00:00:00.000Z
+ *             $ref: '#/components/schemas/Match'
  *     responses:
  *       200:
  *         description: Match updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                   example: 60d0fe4f5311236168a109ca
- *                 title:
- *                   type: string
- *                   example: Updated Match Title
- *                 date:
- *                   type: string
- *                   format: date-time
- *                   example: 2025-02-14T00:00:00.000Z
  *       404:
  *         description: Match not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Match not found
  *       500:
  *         description: Server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Internal server error
  */
-router.put("/:id", protect, isAdmin, updateMatch); // Update match (Admin only)
+router.put("/:id", protect, isAdmin, updateMatch);
 
 /**
  * @swagger
@@ -233,35 +250,11 @@ router.put("/:id", protect, isAdmin, updateMatch); // Update match (Admin only)
  *     responses:
  *       200:
  *         description: Match deleted successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Match deleted successfully
  *       404:
  *         description: Match not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Match not found
  *       500:
  *         description: Server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Internal server error
  */
-router.delete("/:id", protect, isAdmin, deleteMatch); // Delete match (Admin only)
+router.delete("/:id", protect, isAdmin, deleteMatch);
 
 export default router;

@@ -13,6 +13,84 @@ const router = express.Router();
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     PlayerStats:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           example: 60d0fe4f5311236168a109ca
+ *         match:
+ *           type: string
+ *           example: "60d0fe4f5311236168a109cb"
+ *         player:
+ *           type: string
+ *           example: "60d0fe4f5311236168a109cc"
+ *         fieldGoalsMade:
+ *           type: number
+ *           example: 5
+ *         fieldGoalsAttempted:
+ *           type: number
+ *           example: 10
+ *         twoPointsMade:
+ *           type: number
+ *           example: 4
+ *         twoPointsAttempted:
+ *           type: number
+ *           example: 6
+ *         threePointsMade:
+ *           type: number
+ *           example: 1
+ *         threePointsAttempted:
+ *           type: number
+ *           example: 4
+ *         freeThrowsMade:
+ *           type: number
+ *           example: 3
+ *         freeThrowsAttempted:
+ *           type: number
+ *           example: 4
+ *         offensiveRebounds:
+ *           type: number
+ *           example: 2
+ *         defensiveRebounds:
+ *           type: number
+ *           example: 5
+ *         totalAssists:
+ *           type: number
+ *           example: 7
+ *         totalSteals:
+ *           type: number
+ *           example: 3
+ *         totalBlocks:
+ *           type: number
+ *           example: 1
+ *         totalTurnovers:
+ *           type: number
+ *           example: 2
+ *         totalFouls:
+ *           type: number
+ *           example: 4
+ *         plusMinus:
+ *           type: number
+ *           example: 8
+ *         efficiency:
+ *           type: number
+ *           example: 20
+ *         totalPoints:
+ *           type: number
+ *           example: 15
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ */
+
+/**
+ * @swagger
  * /api/player-stats:
  *   get:
  *     summary: Get all player stats
@@ -25,23 +103,7 @@ const router = express.Router();
  *             schema:
  *               type: array
  *               items:
- *                 type: object
- *                 properties:
- *                   playerId:
- *                     type: string
- *                     example: 60d0fe4f5311236168a109ca
- *                   matchId:
- *                     type: string
- *                     example: 60d0fe4f5311236168a109cb
- *                   points:
- *                     type: integer
- *                     example: 25
- *                   rebounds:
- *                     type: integer
- *                     example: 10
- *                   assists:
- *                     type: integer
- *                     example: 5
+ *                 $ref: '#/components/schemas/PlayerStats'
  *       500:
  *         description: Server error
  */
@@ -66,23 +128,9 @@ router.get("/", getAllPlayerStats);
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 playerId:
- *                   type: string
- *                   example: 60d0fe4f5311236168a109ca
- *                 matchId:
- *                   type: string
- *                   example: 60d0fe4f5311236168a109cb
- *                 points:
- *                   type: integer
- *                   example: 25
- *                 rebounds:
- *                   type: integer
- *                   example: 10
- *                 assists:
- *                   type: integer
- *                   example: 5
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/PlayerStats'
  *       404:
  *         description: Player stats not found
  *       500:
@@ -109,23 +157,9 @@ router.get("/player/:playerId", getStatsByPlayer);
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 playerId:
- *                   type: string
- *                   example: 60d0fe4f5311236168a109ca
- *                 matchId:
- *                   type: string
- *                   example: 60d0fe4f5311236168a109cb
- *                 points:
- *                   type: integer
- *                   example: 25
- *                 rebounds:
- *                   type: integer
- *                   example: 10
- *                 assists:
- *                   type: integer
- *                   example: 5
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/PlayerStats'
  *       404:
  *         description: Match stats not found
  *       500:
@@ -146,72 +180,18 @@ router.get("/match/:matchId", getStatsByMatch);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - playerId
- *               - matchId
- *               - points
- *               - rebounds
- *               - assists
- *             properties:
- *               playerId:
- *                 type: string
- *                 example: 60d0fe4f5311236168a109ca
- *               matchId:
- *                 type: string
- *                 example: 60d0fe4f5311236168a109cb
- *               points:
- *                 type: integer
- *                 example: 25
- *               rebounds:
- *                 type: integer
- *                 example: 10
- *               assists:
- *                 type: integer
- *                 example: 5
+ *             $ref: '#/components/schemas/PlayerStats'
  *     responses:
  *       201:
  *         description: Player stats added successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 playerId:
- *                   type: string
- *                   example: 60d0fe4f5311236168a109ca
- *                 matchId:
- *                   type: string
- *                   example: 60d0fe4f5311236168a109cb
- *                 points:
- *                   type: integer
- *                   example: 25
- *                 rebounds:
- *                   type: integer
- *                   example: 10
- *                 assists:
- *                   type: integer
- *                   example: 5
+ *               $ref: '#/components/schemas/PlayerStats'
  *       400:
- *         description: Bad request
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Invalid request data
+ *         description: Bad request (missing required fields)
  *       500:
  *         description: Server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Internal server error
  */
 router.post("/", protect, isAdmin, addPlayerStats);
 
@@ -235,60 +215,14 @@ router.post("/", protect, isAdmin, addPlayerStats);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               points:
- *                 type: integer
- *                 example: 30
- *               rebounds:
- *                 type: integer
- *                 example: 12
- *               assists:
- *                 type: integer
- *                 example: 7
+ *             $ref: '#/components/schemas/PlayerStats'
  *     responses:
  *       200:
  *         description: Player stats updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 playerId:
- *                   type: string
- *                   example: 60d0fe4f5311236168a109ca
- *                 matchId:
- *                   type: string
- *                   example: 60d0fe4f5311236168a109cb
- *                 points:
- *                   type: integer
- *                   example: 30
- *                 rebounds:
- *                   type: integer
- *                   example: 12
- *                 assists:
- *                   type: integer
- *                   example: 7
  *       404:
  *         description: Player stats not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Player stats not found
  *       500:
  *         description: Server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Internal server error
  */
 router.put("/:id", protect, isAdmin, updatePlayerStats);
 
@@ -310,34 +244,10 @@ router.put("/:id", protect, isAdmin, updatePlayerStats);
  *     responses:
  *       200:
  *         description: Player stats deleted successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Player stats deleted successfully
  *       404:
  *         description: Player stats not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Player stats not found
  *       500:
  *         description: Server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Internal server error
  */
 router.delete("/:id", protect, isAdmin, deletePlayerStats);
 

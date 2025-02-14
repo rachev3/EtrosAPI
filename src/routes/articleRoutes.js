@@ -12,6 +12,49 @@ const router = express.Router();
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Article:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           example: 60d0fe4f5311236168a109ca
+ *         title:
+ *           type: string
+ *           example: "New Basketball Season Preview"
+ *         content:
+ *           type: string
+ *           example: "This article discusses the upcoming basketball season."
+ *         author:
+ *           type: string
+ *           example: "Admin"
+ *         metaTitle:
+ *           type: string
+ *           example: "Basketball Season 2024"
+ *         metaDescription:
+ *           type: string
+ *           example: "An in-depth preview of the upcoming basketball season."
+ *         metaKeywords:
+ *           type: array
+ *           items:
+ *             type: string
+ *           example: ["basketball", "season", "preview"]
+ *         images:
+ *           type: array
+ *           items:
+ *             type: string
+ *           example: ["https://example.com/image1.jpg", "https://example.com/image2.jpg"]
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ */
+
+/**
+ * @swagger
  * /api/articles:
  *   get:
  *     summary: Get all articles
@@ -24,24 +67,11 @@ const router = express.Router();
  *             schema:
  *               type: array
  *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: string
- *                     example: 60d0fe4f5311236168a109ca
- *                   title:
- *                     type: string
- *                     example: Article Title
- *                   content:
- *                     type: string
- *                     example: This is the content of the article.
- *                   author:
- *                     type: string
- *                     example: Admin
+ *                 $ref: '#/components/schemas/Article'
  *       500:
  *         description: Server error
  */
-router.get("/", getArticles); // Get all articles
+router.get("/", getArticles);
 
 /**
  * @swagger
@@ -62,26 +92,13 @@ router.get("/", getArticles); // Get all articles
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                   example: 60d0fe4f5311236168a109ca
- *                 title:
- *                   type: string
- *                   example: Article Title
- *                 content:
- *                   type: string
- *                   example: This is the content of the article.
- *                 author:
- *                   type: string
- *                   example: Admin
+ *               $ref: '#/components/schemas/Article'
  *       404:
  *         description: Article not found
  *       500:
  *         description: Server error
  */
-router.get("/:id", getArticle); // Get single article
+router.get("/:id", getArticle);
 
 /**
  * @swagger
@@ -103,22 +120,42 @@ router.get("/:id", getArticle); // Get single article
  *             properties:
  *               title:
  *                 type: string
- *                 example: New Article
+ *                 example: "New Basketball Season"
  *               content:
  *                 type: string
- *                 example: This is the content of the new article.
+ *                 example: "This article discusses the latest basketball updates."
  *               author:
  *                 type: string
- *                 example: Admin
+ *                 example: "Admin"
+ *               metaTitle:
+ *                 type: string
+ *                 example: "Basketball News 2024"
+ *               metaDescription:
+ *                 type: string
+ *                 example: "All the latest updates about the basketball season."
+ *               metaKeywords:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["basketball", "sports", "season"]
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["https://example.com/image1.jpg"]
  *     responses:
  *       201:
  *         description: Article created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Article'
  *       400:
- *         description: Article with this title already exists
+ *         description: Bad request (duplicate title or missing fields)
  *       500:
  *         description: Server error
  */
-router.post("/", protect, isAdmin, createArticle); // Add article (Admin only)
+router.post("/", protect, isAdmin, createArticle);
 
 /**
  * @swagger
@@ -144,22 +181,42 @@ router.post("/", protect, isAdmin, createArticle); // Add article (Admin only)
  *             properties:
  *               title:
  *                 type: string
- *                 example: Updated Article Title
+ *                 example: "Updated Basketball Season"
  *               content:
  *                 type: string
- *                 example: Updated content of the article.
+ *                 example: "Updated details about the upcoming basketball season."
  *               author:
  *                 type: string
- *                 example: Admin
+ *                 example: "Admin"
+ *               metaTitle:
+ *                 type: string
+ *                 example: "Updated Basketball News 2024"
+ *               metaDescription:
+ *                 type: string
+ *                 example: "Updated insights into the basketball season."
+ *               metaKeywords:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["updated", "basketball", "news"]
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["https://example.com/updated_image.jpg"]
  *     responses:
  *       200:
  *         description: Article updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Article'
  *       404:
  *         description: Article not found
  *       500:
  *         description: Server error
  */
-router.put("/:id", protect, isAdmin, updateArticle); // Update article (Admin only)
+router.put("/:id", protect, isAdmin, updateArticle);
 
 /**
  * @swagger
@@ -184,6 +241,6 @@ router.put("/:id", protect, isAdmin, updateArticle); // Update article (Admin on
  *       500:
  *         description: Server error
  */
-router.delete("/:id", protect, isAdmin, deleteArticle); // Delete article (Admin only)
+router.delete("/:id", protect, isAdmin, deleteArticle);
 
 export default router;

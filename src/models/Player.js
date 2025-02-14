@@ -8,10 +8,20 @@ const playerSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
-    position: {
-      type: String,
+    bornYear: {
+      type: Number, // Example: 1990
       required: true,
-      enum: ["Guard", "Forward", "Center"], // Restricts to these values
+    },
+    position: {
+      type: [String],
+      required: false,
+      enum: [
+        "PointGuard",
+        "ShootingGuard",
+        "PowerForward",
+        "SmallForward",
+        "Center",
+      ], // Example: ["PointGuard", "ShootingGuard"]
     },
     height: {
       type: String, // Example: "6'5" (6 feet 5 inches)
@@ -21,13 +31,14 @@ const playerSchema = new mongoose.Schema(
       type: Number, // Example: 220 (220 lbs)
       required: false,
     },
-    stats: {
-      points: { type: Number, default: 0 },
-      rebounds: { type: Number, default: 0 },
-      assists: { type: Number, default: 0 },
-      steals: { type: Number, default: 0 },
-      blocks: { type: Number, default: 0 },
+    imageUrl: {
+      type: String,
+      required: false,
     },
+
+    statsHistory: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "PlayerStats" },
+    ],
   },
   { timestamps: true } // Automatically adds createdAt & updatedAt
 );

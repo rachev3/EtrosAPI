@@ -13,3 +13,6 @@ node_modules/
 
 # Ignore firebase key
 /src/config/firebase-key.json
+
+# Ignore seeder file
+/src/utils/seeder.js

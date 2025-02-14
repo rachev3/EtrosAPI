@@ -28,6 +28,7 @@ const swaggerOptions = {
     "src/routes/articleRoutes.js",
     "src/routes/statsRoutes.js",
     "src/routes/imageRoutes.js",
+    "src/routes/playerStatsRoutes.js",
   ], // Scans all route files for API documentation
 };
 

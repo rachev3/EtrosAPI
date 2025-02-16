@@ -12,8 +12,6 @@ const manageEtrosPlayers = async (players) => {
     errors: [],
   };
 
-  console.log("Managing players:", players);
-
   for (const playerData of players) {
     try {
       // Skip DNP players
@@ -34,8 +32,6 @@ const manageEtrosPlayers = async (players) => {
           number: playerData.number,
           bornYear: 2000, // Placeholder year
         });
-
-        console.log(`Created new player: ${cleanName} (#${playerData.number})`);
         results.created.push(`${cleanName} (#${playerData.number})`);
       } else {
         // Update player number if it has changed
@@ -43,9 +39,6 @@ const manageEtrosPlayers = async (players) => {
           player.number = playerData.number;
           await player.save();
         }
-        console.log(
-          `Found existing player: ${cleanName} (#${playerData.number})`
-        );
         results.existing.push(`${cleanName} (#${playerData.number})`);
       }
     } catch (error) {
@@ -72,9 +65,6 @@ export const uploadMatchPdf = async (req, res) => {
     // Parse the PDF content
     const parsedData = await parseMatchStatistics(buffer);
 
-    // Debug log to see the structure
-    console.log("Parsed Data Structure:", JSON.stringify(parsedData, null, 2));
-
     // Get the Етрос team data
     const etrosTeam = parsedData.metadata.isEtrosHome
       ? parsedData.homeTeam
@@ -89,7 +79,6 @@ export const uploadMatchPdf = async (req, res) => {
 
     // Manage Etros players before processing the match
     const playerResults = await manageEtrosPlayers(etrosTeam.players);
-    console.log("Player management results:", playerResults);
 
     // Check for duplicates using the parsed date and opponent
     const existingUpload = await MatchPdfUpload.findOne({
@@ -116,7 +105,6 @@ export const uploadMatchPdf = async (req, res) => {
     try {
       // Use the parsed team stats directly instead of calculating from players
       const teamStats = parsedData.teamStats;
-      console.log("Team stats to be saved:", teamStats);
 
       // Check for an existing upcoming match
       const existingMatch = await Match.findOne({
@@ -128,7 +116,6 @@ export const uploadMatchPdf = async (req, res) => {
       let match;
 
       if (existingMatch) {
-        console.log("Updating existing match with stats:", teamStats);
         // Update existing match
         match = await Match.findByIdAndUpdate(
           existingMatch._id,
@@ -212,10 +199,6 @@ export const uploadMatchPdf = async (req, res) => {
         processingStatus: "completed",
         matchId: match._id,
       });
-
-      // Verify the saved match data
-      const savedMatch = await Match.findById(match._id);
-      console.log("Saved match data:", savedMatch);
 
       res.status(201).json({
         message: existingMatch

@@ -35,9 +35,6 @@ export const parseMatchStatistics = async (pdfBuffer) => {
           .join(" ")
       );
 
-    // Debug log for raw text
-    console.log("Processed lines:", lines);
-
     // Extract basic match information
     const matchInfo = extractMatchInfo(lines);
 
@@ -254,8 +251,6 @@ const extractTeamStats = (lines, isEtrosHome) => {
     totalPoints: 0,
   };
 
-  console.log("Looking for Етрос section and Totals line...");
-
   // Find both Totals lines
   const totalsLines = lines.filter(
     (line) =>
@@ -263,23 +258,18 @@ const extractTeamStats = (lines, isEtrosHome) => {
       (line.includes("200:00") || line.includes("225:00"))
   );
 
-  console.log("Found Totals lines:", totalsLines);
-
   if (totalsLines.length === 2) {
     // Get the correct Totals line based on whether Етрос is home or away
     const totalsLine = totalsLines[isEtrosHome ? 0 : 1];
-    console.log("Using Totals line:", totalsLine);
 
     try {
       // Split the line by spaces and filter out empty strings
       const parts = totalsLine.split(/\s+/).filter(Boolean);
-      console.log("Split parts:", parts);
 
       // Find the index of time (either 200:00 or 225:00)
       const timeIndex = parts.findIndex(
         (part) => part === "200:00" || part === "225:00"
       );
-      console.log("Time index:", timeIndex);
 
       if (timeIndex !== -1) {
         // Field Goals
@@ -313,21 +303,10 @@ const extractTeamStats = (lines, isEtrosHome) => {
         stats.totalBlocks = Number(parts[statsStart + 6]);
         stats.totalFouls = Number(parts[statsStart + 7]);
         stats.totalPoints = Number(parts[parts.length - 1]);
-
-        console.log("Extracted stats:", stats);
       }
     } catch (error) {
-      console.error("Error parsing stats:", error);
-      console.error(
-        "Totals line parts:",
-        totalsLine.split(/\s+/).filter(Boolean)
-      );
+      console.error("Error parsing team stats:", error);
     }
-  } else {
-    console.error(
-      "Could not find both Totals lines. Found:",
-      totalsLines.length
-    );
   }
 
   return stats;
@@ -467,7 +446,6 @@ const extractPlayerStats = (lines) => {
     players.push(currentPlayer);
   }
 
-  console.log("Extracted Etros players:", players);
   return players;
 };
 

@@ -130,14 +130,6 @@ The API supports automated processing of FIBA box score PDFs:
 - Must contain both team and player statistics
 - Supports both home and away team scenarios
 
-### Code Style
-
-The project uses ESLint for code style enforcement. Run:
-
-```sh
-npm run lint
-```
-
 ## 📝 License
 
 This project is licensed under the MIT License.

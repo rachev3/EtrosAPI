@@ -8,6 +8,10 @@ const playerSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
+    number: {
+      type: String,
+      required: true,
+    },
     bornYear: {
       type: Number, // Example: 1990
       required: true,

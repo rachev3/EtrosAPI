@@ -5,6 +5,11 @@ const matchSchema = new mongoose.Schema(
     opponent: { type: String, required: true, trim: true },
     date: { type: Date, required: true },
     location: { type: String, required: true },
+    status: {
+      type: String,
+      enum: ["upcoming", "finished"],
+      default: "upcoming",
+    },
     result: {
       type: String,
       enum: ["Win", "Loss", "Pending"],
@@ -38,6 +43,17 @@ const matchSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Pre-save middleware to normalize date to only include year, month, day, hour, and minutes
+matchSchema.pre("save", function (next) {
+  if (this.date) {
+    const d = new Date(this.date);
+    // Set seconds and milliseconds to 0
+    d.setSeconds(0, 0);
+    this.date = d;
+  }
+  next();
+});
 
 const Match = mongoose.model("Match", matchSchema);
 export default Match;

@@ -1,0 +1,21 @@
+export default {
+  moduleDirectories: ["node_modules", "src"],
+  roots: ["<rootDir>/src"],
+  resolver: undefined,
+  transformIgnorePatterns: [],
+  moduleFileExtensions: ["js", "json", "node"],
+  testEnvironment: "node",
+  transform: {},
+  testMatch: ["**/__tests__/**/*.test.js"],
+  moduleNameMapper: {
+    "^@/(.*)$": "<rootDir>/src/$1",
+    "^(\\.{1,2}/.*)\\.js$": "$1",
+  },
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
+  testTimeout: 10000,
+  modulePathIgnorePatterns: ["<rootDir>/node_modules/"],
+  testPathIgnorePatterns: ["<rootDir>/node_modules/"],
+  collectCoverage: false,
+  clearMocks: true,
+  restoreMocks: true,
+};

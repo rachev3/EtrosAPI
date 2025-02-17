@@ -12,6 +12,7 @@ Objectives
 ✅ Implement a duplicate check mechanism to avoid re-uploading the same match statistics.
 ⚠️ Integrate with the existing EtrosAPI endpoints to store the extracted data (Basic integration done, some features missing).
 ❌ Provide robust error handling, logging, and testing.
+❌ Implement preview functionality for data review before final submission.
 
 ────────────────────────────── 2. Requirements & Functional Specifications
 
@@ -22,10 +23,7 @@ A. Input and PDF Parsing
 ✅ Match metadata: game number, date, start time, attendance, game duration
 ⚠️ Team-level statistics:
 ✅ Overall points
-❌ Scoring breakdowns (points from turnovers, points in the paint, bench points)
-❌ Scoring intervals
 ✅ Player-level statistics: player name, minutes played, field goal stats, etc.
-❌ Coach and additional match summary information
 
 B. Data Transformation and Validation
 ⚠️ Map the extracted data to your database schema (Basic mapping done)
@@ -37,14 +35,23 @@ C. Duplicate Checking
 ✅ Skip if duplicate is detected
 ✅ Proper duplicate handling response
 
-D. API Integration
+D. Preview and Review Functionality
+❌ Implement initial preview endpoint for extracted data
+❌ Show match details (date, teams, venue)
+❌ Display team statistics summary
+❌ List player statistics with validation warnings
+❌ Flag potential issues (missing data, inconsistencies)
+❌ Implement confirmation endpoint for final data submission
+❌ Allow admin review and adjustment before final submission
+
+E. API Integration
 ⚠️ Utilize EtrosAPI's endpoints:
 ✅ Inserting new match records
 ✅ Adding team-level statistics
 ✅ Adding individual player statistics
 ⚠️ Error handling and logging needs improvement
 
-E. Security
+F. Security
 ✅ Ensure that only authenticated admin users can perform the upload
 ✅ Implementation of authentication middleware and authorization checks
 
@@ -70,6 +77,12 @@ B. Implementation Steps
 ✅ Duplicate Check Logic:
 ✅ Database querying for duplicates
 ✅ Duplicate handling
+
+❌ Preview Implementation:
+❌ Create preview endpoint
+❌ Implement data validation checks
+❌ Add warning flags for potential issues
+❌ Create confirmation endpoint
 
 ⚠️ API Communication:
 ✅ POST new match data
@@ -105,6 +118,8 @@ B. Implementation Steps
 ✅ Secure PDF upload endpoint
 ✅ PDF parsing module
 ✅ Duplicate check implementation
+❌ Preview functionality
+❌ Confirmation endpoint
 ⚠️ API integration
 ❌ Tests
 ❌ Deployment instructions
@@ -116,14 +131,16 @@ B. Implementation Steps
 ✅ Reliable duplicate checking
 ⚠️ Data insertion with proper error handling (Needs improvement)
 ✅ Admin-only access
+❌ Preview functionality with validation warnings
+❌ Confirmation mechanism for final submission
 ❌ Code modularity, documentation, and test coverage
 
 STATUS SUMMARY:
 ✅ Completed: Basic PDF parsing, data extraction, admin security, duplicate checking
 ⚠️ Partial: Error handling, data validation, API integration
-❌ Pending: Testing, documentation, advanced stats, logging, scalability features
+❌ Pending: Preview functionality, confirmation mechanism, testing, documentation, advanced stats, logging, scalability features
 
 Additions:
 more readable code
 optimizations for speed
-checking if this apporoach is the best for the task
+checking if this approach is the best for the task

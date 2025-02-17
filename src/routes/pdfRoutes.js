@@ -3,6 +3,8 @@ import multer from "multer";
 import {
   uploadMatchPdf,
   getUploadStatus,
+  previewMatchPdf,
+  confirmMatchPdf,
 } from "../controllers/pdfController.js";
 import { protect, isAdmin } from "../middleware/authMiddleware.js";
 
@@ -192,5 +194,121 @@ router.post("/upload", protect, isAdmin, upload.single("pdf"), uploadMatchPdf);
  *                   example: "Failed to get upload status"
  */
 router.get("/status/:uploadId", protect, isAdmin, getUploadStatus);
+
+/**
+ * @swagger
+ * /api/pdf/preview:
+ *   post:
+ *     summary: Preview basketball match statistics from PDF before saving
+ *     description: Uploads a FIBA box score PDF file and returns extracted data for review without saving
+ *     tags: [PDF]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               pdf:
+ *                 type: string
+ *                 format: binary
+ *                 description: The PDF file containing match statistics (max 5MB)
+ *     responses:
+ *       200:
+ *         description: PDF successfully parsed and preview generated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 matchDetails:
+ *                   type: object
+ *                   properties:
+ *                     date:
+ *                       type: string
+ *                       format: date-time
+ *                     venue:
+ *                       type: string
+ *                     teams:
+ *                       type: object
+ *                 teamStatistics:
+ *                   type: object
+ *                 playerStatistics:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 potentialIssues:
+ *                   type: object
+ *                 uploadToken:
+ *                   type: string
+ *       400:
+ *         description: Invalid request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       409:
+ *         description: Duplicate match found
+ *       500:
+ *         description: Server error
+ */
+router.post(
+  "/preview",
+  protect,
+  isAdmin,
+  upload.single("pdf"),
+  previewMatchPdf
+);
+
+/**
+ * @swagger
+ * /api/pdf/confirm:
+ *   post:
+ *     summary: Confirm and save previewed match statistics
+ *     description: Confirms the previewed data and saves it to the database, with optional adjustments
+ *     tags: [PDF]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               uploadToken:
+ *                 type: string
+ *                 description: Token received from preview endpoint
+ *               adjustments:
+ *                 type: object
+ *                 description: Optional adjustments to the previewed data
+ *     responses:
+ *       201:
+ *         description: Match data successfully saved
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 uploadId:
+ *                   type: string
+ *                 matchId:
+ *                   type: string
+ *                 playerManagement:
+ *                   type: object
+ *       400:
+ *         description: Invalid request or token
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Server error
+ */
+router.post("/confirm", protect, isAdmin, confirmMatchPdf);
 
 export default router;

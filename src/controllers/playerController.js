@@ -29,12 +29,25 @@ export const getPlayer = asyncHandler(async (req, res) => {
 
 // **3️⃣ Create a New Player (Admin Only)**
 export const createPlayer = asyncHandler(async (req, res) => {
-  const { name, position, height, weight, stats, bornYear } = req.body;
+  const { name, number, position, height, weight, stats, bornYear, imageUrl } =
+    req.body;
 
   // Validate required fields
   if (!name) {
     throw new AppError("Name is required", 400, "MISSING_FIELDS", {
       field: "name",
+    });
+  }
+
+  if (!number) {
+    throw new AppError("Number is required", 400, "MISSING_FIELDS", {
+      field: "number",
+    });
+  }
+
+  if (!bornYear) {
+    throw new AppError("Born year is required", 400, "MISSING_FIELDS", {
+      field: "bornYear",
     });
   }
 
@@ -51,11 +64,13 @@ export const createPlayer = asyncHandler(async (req, res) => {
   // Create new player
   const newPlayer = await Player.create({
     name,
+    number,
     bornYear,
     position,
     height,
     weight,
     stats,
+    imageUrl,
   });
 
   res.status(201).json({

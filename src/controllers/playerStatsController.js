@@ -5,9 +5,17 @@ import Player from "../models/Player.js";
 export const getAllPlayerStats = async (req, res) => {
   try {
     const stats = await PlayerStats.find().populate("player match");
-    res.status(200).json(stats);
+    res.status(200).json({
+      success: true,
+      count: stats.length,
+      data: stats,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
   }
 };
 
@@ -19,14 +27,23 @@ export const getStatsByPlayer = async (req, res) => {
     );
 
     if (!stats.length) {
-      return res
-        .status(404)
-        .json({ message: "No stats found for this player" });
+      return res.status(404).json({
+        success: false,
+        message: "No stats found for this player",
+      });
     }
 
-    res.status(200).json(stats);
+    res.status(200).json({
+      success: true,
+      count: stats.length,
+      data: stats,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
   }
 };
 
@@ -36,12 +53,23 @@ export const getStatsByMatch = async (req, res) => {
     const stats = await PlayerStats.find({ match: matchId }).populate("player");
 
     if (!stats.length) {
-      return res.status(404).json({ message: "No stats found for this match" });
+      return res.status(404).json({
+        success: false,
+        message: "No stats found for this match",
+      });
     }
 
-    res.status(200).json(stats);
+    res.status(200).json({
+      success: true,
+      count: stats.length,
+      data: stats,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
   }
 };
 
@@ -59,10 +87,18 @@ export const addPlayerStats = async (req, res) => {
     } = req.body;
 
     const match = await Match.findById(matchId);
-    if (!match) return res.status(404).json({ message: "Match not found" });
+    if (!match)
+      return res.status(404).json({
+        success: false,
+        message: "Match not found",
+      });
 
     const player = await Player.findById(playerId);
-    if (!player) return res.status(404).json({ message: "Player not found" });
+    if (!player)
+      return res.status(404).json({
+        success: false,
+        message: "Player not found",
+      });
 
     const newStats = await PlayerStats.create({
       match: matchId,
@@ -81,9 +117,16 @@ export const addPlayerStats = async (req, res) => {
     match.playerStats.push(newStats._id);
     await match.save();
 
-    res.status(201).json(newStats);
+    res.status(201).json({
+      success: true,
+      data: newStats,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
   }
 };
 
@@ -95,12 +138,22 @@ export const updatePlayerStats = async (req, res) => {
     });
 
     if (!updatedStats) {
-      return res.status(404).json({ message: "Player stats not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Player stats not found",
+      });
     }
 
-    res.status(200).json(updatedStats);
+    res.status(200).json({
+      success: true,
+      data: updatedStats,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
   }
 };
 
@@ -110,11 +163,21 @@ export const deletePlayerStats = async (req, res) => {
     const deletedStats = await PlayerStats.findByIdAndDelete(id);
 
     if (!deletedStats) {
-      return res.status(404).json({ message: "Player stats not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Player stats not found",
+      });
     }
 
-    res.status(200).json({ message: "Player stats deleted successfully" });
+    res.status(200).json({
+      success: true,
+      message: "Player stats deleted successfully",
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
   }
 };

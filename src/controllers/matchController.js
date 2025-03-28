@@ -4,9 +4,17 @@ import Match from "../models/Match.js";
 export const getMatches = async (req, res) => {
   try {
     const matches = await Match.find().sort({ date: -1 }); // Sort by latest match
-    res.status(200).json(matches);
+    res.status(200).json({
+      success: true,
+      count: matches.length,
+      data: matches,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
   }
 };
 
@@ -15,11 +23,21 @@ export const getMatch = async (req, res) => {
   try {
     const match = await Match.findById(req.params.id);
     if (!match) {
-      return res.status(404).json({ message: "Match not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Match not found",
+      });
     }
-    res.status(200).json(match);
+    res.status(200).json({
+      success: true,
+      data: match,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
   }
 };
 
@@ -82,9 +100,16 @@ export const createMatch = async (req, res) => {
       playerStats: playerStats || [],
     });
 
-    res.status(201).json(newMatch);
+    res.status(201).json({
+      success: true,
+      data: newMatch,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
   }
 };
 
@@ -98,6 +123,7 @@ export const updateMatch = async (req, res) => {
         req.body.opponentScore === undefined
       ) {
         return res.status(400).json({
+          success: false,
           message: "Score values are required when setting a match result",
         });
       }
@@ -111,12 +137,22 @@ export const updateMatch = async (req, res) => {
     );
 
     if (!updatedMatch) {
-      return res.status(404).json({ message: "Match not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Match not found",
+      });
     }
 
-    res.status(200).json(updatedMatch);
+    res.status(200).json({
+      success: true,
+      data: updatedMatch,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
   }
 };
 
@@ -193,11 +229,21 @@ export const deleteMatch = async (req, res) => {
     const match = await Match.findByIdAndDelete(req.params.id);
 
     if (!match) {
-      return res.status(404).json({ message: "Match not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Match not found",
+      });
     }
 
-    res.status(200).json({ message: "Match deleted successfully" });
+    res.status(200).json({
+      success: true,
+      message: "Match deleted successfully",
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
   }
 };

@@ -91,6 +91,19 @@ export const createMatch = async (req, res) => {
 // **Update Match Result (Admin Only)**
 export const updateMatch = async (req, res) => {
   try {
+    // When updating match result, ensure scores are set
+    if (req.body.result && req.body.result !== "Pending") {
+      if (
+        req.body.ourScore === undefined ||
+        req.body.opponentScore === undefined
+      ) {
+        return res.status(400).json({
+          message: "Score values are required when setting a match result",
+        });
+      }
+    }
+
+    // Allow manual updates for all fields including team statistics
     const updatedMatch = await Match.findByIdAndUpdate(
       req.params.id,
       req.body,
@@ -101,14 +114,76 @@ export const updateMatch = async (req, res) => {
       return res.status(404).json({ message: "Match not found" });
     }
 
-    // **Update Team Stats if match result changes**
-    if (req.body.result && req.body.result !== "Pending") {
-      await updateStatsAfterMatch(updatedMatch);
-    }
-
     res.status(200).json(updatedMatch);
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// Helper function to update team stats after a match
+const updateStatsAfterMatch = async (match) => {
+  try {
+    // Populate playerStats to access all the individual player statistics
+    const populatedMatch = await Match.findById(match._id).populate(
+      "playerStats"
+    );
+
+    if (!populatedMatch || !populatedMatch.playerStats.length) {
+      console.log("No player stats found for this match");
+      return;
+    }
+
+    // Initialize team stats object with zeros
+    const teamStats = {
+      fieldGoalsMade: 0,
+      fieldGoalsAttempted: 0,
+      twoPointsMade: 0,
+      twoPointsAttempted: 0,
+      threePointsMade: 0,
+      threePointsAttempted: 0,
+      freeThrowsMade: 0,
+      freeThrowsAttempted: 0,
+      offensiveRebounds: 0,
+      defensiveRebounds: 0,
+      totalAssists: 0,
+      totalSteals: 0,
+      totalBlocks: 0,
+      totalTurnovers: 0,
+      totalFouls: 0,
+      totalPoints: 0,
+    };
+
+    // Aggregate all player stats into team stats
+    populatedMatch.playerStats.forEach((playerStat) => {
+      teamStats.fieldGoalsMade += playerStat.fieldGoalsMade || 0;
+      teamStats.fieldGoalsAttempted += playerStat.fieldgoalsAttempted || 0;
+      teamStats.twoPointsMade += playerStat.twoPointsMade || 0;
+      teamStats.twoPointsAttempted += playerStat.twoPointsAttempted || 0;
+      teamStats.threePointsMade += playerStat.threePointsMade || 0;
+      teamStats.threePointsAttempted += playerStat.threePointsAttempted || 0;
+      teamStats.freeThrowsMade += playerStat.freeThrowsMade || 0;
+      teamStats.freeThrowsAttempted += playerStat.freeThrowsAttempted || 0;
+      teamStats.offensiveRebounds += playerStat.offensiveRebounds || 0;
+      teamStats.defensiveRebounds += playerStat.defensiveRebounds || 0;
+      teamStats.totalAssists += playerStat.totalAssists || 0;
+      teamStats.totalSteals += playerStat.totalSteals || 0;
+      teamStats.totalBlocks += playerStat.totalBlocks || 0;
+      teamStats.totalTurnovers += playerStat.totalTurnovers || 0;
+      teamStats.totalFouls += playerStat.totalFouls || 0;
+      teamStats.totalPoints += playerStat.totalPoints || 0;
+    });
+
+    // Update match with aggregated team stats
+    await Match.findByIdAndUpdate(match._id, { teamStats });
+
+    // Optional: Update player stats to reflect the final match result
+    // For example, you could update player win/loss records here if needed
+
+    console.log("Match stats updated successfully");
+    return true;
+  } catch (error) {
+    console.error("Error updating stats after match:", error);
+    return false;
   }
 };
 

@@ -5,6 +5,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
+    "seed": "node src/utils/seeder.js",
     "test": "cross-env NODE_ENV=test MONGODB_URI_TEST=mongodb://localhost:27017/etros_test JWT_SECRET=test_secret NODE_OPTIONS=--experimental-vm-modules jest",
     "test:watch": "cross-env NODE_ENV=test MONGODB_URI_TEST=mongodb://localhost:27017/etros_test JWT_SECRET=test_secret NODE_OPTIONS=--experimental-vm-modules jest --watch",
     "test:coverage": "cross-env NODE_ENV=test MONGODB_URI_TEST=mongodb://localhost:27017/etros_test JWT_SECRET=test_secret NODE_OPTIONS=--experimental-vm-modules jest --coverage"

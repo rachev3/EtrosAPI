@@ -405,7 +405,7 @@ const validatePlayerData = async (players) => {
 
     // Check for unusual statistics
     if (!player.didNotPlay) {
-      if (player.points > 50) {
+      if (player.points > 70) {
         issues.unusualStats.push({
           name: player.name,
           issue: "Unusually high points",

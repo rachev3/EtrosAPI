@@ -1,6 +1,8 @@
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import asyncHandler from "../utils/asyncHandler.js";
+import { AppError } from "../middleware/errorHandler.js";
 
 dotenv.config();
 
@@ -12,71 +14,96 @@ const generateToken = (userId) => {
 };
 
 // **User Registration**
-export const registerUser = async (req, res) => {
-  try {
-    const { username, email, password } = req.body;
+export const registerUser = asyncHandler(async (req, res) => {
+  const { username, email, password } = req.body;
 
-    // Check if user already exists
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({ message: "User already exists" });
-    }
-
-    // Create new user
-    const user = await User.create({ username, email, password });
-
-    if (user) {
-      res.status(201).json({
-        _id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        token: generateToken(user._id),
-      });
-    } else {
-      res.status(400).json({ message: "Invalid user data" });
-    }
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+  // Check if all required fields are provided
+  if (!username || !email || !password) {
+    throw new AppError(
+      "Please provide all required fields",
+      400,
+      "MISSING_FIELDS",
+      {
+        missingFields: Object.entries({ username, email, password })
+          .filter(([_, value]) => !value)
+          .map(([key]) => key),
+      }
+    );
   }
-};
+
+  // Check if user already exists
+  const userExists = await User.findOne({ email });
+  if (userExists) {
+    throw new AppError(
+      "User already exists with this email",
+      409,
+      "USER_EXISTS"
+    );
+  }
+
+  // Create new user
+  const user = await User.create({ username, email, password });
+
+  res.status(201).json({
+    success: true,
+    data: {
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      token: generateToken(user._id),
+    },
+  });
+});
 
 // **User Login**
-export const loginUser = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    // Check if user exists
-    const user = await User.findOne({ email });
+export const loginUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
 
-    console.log(user);
-
-    if (user && (await user.matchPassword(password))) {
-      res.json({
-        _id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        token: generateToken(user._id),
-      });
-    } else {
-      res.status(401).json({ message: "Invalid email or password" });
-    }
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+  // Check if email and password are provided
+  if (!email || !password) {
+    throw new AppError(
+      "Please provide email and password",
+      400,
+      "MISSING_CREDENTIALS"
+    );
   }
-};
+
+  // Check if user exists
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new AppError("Invalid email or password", 401, "INVALID_CREDENTIALS");
+  }
+
+  // Check if password matches
+  const isMatch = await user.matchPassword(password);
+  if (!isMatch) {
+    throw new AppError("Invalid email or password", 401, "INVALID_CREDENTIALS");
+  }
+
+  res.json({
+    success: true,
+    data: {
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      token: generateToken(user._id),
+    },
+  });
+});
 
 // **Get User Profile (Protected Route)**
-export const getUserProfile = async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select("-password"); // Exclude password
+export const getUserProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id).select("-password"); // Exclude password
 
-    if (user) {
-      res.json(user);
-    } else {
-      res.status(404).json({ message: "User not found" });
-    }
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+  if (!user) {
+    throw new AppError("User not found", 404, "USER_NOT_FOUND");
   }
-};
+
+  res.json({
+    success: true,
+    data: user,
+  });
+});

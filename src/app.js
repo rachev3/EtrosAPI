@@ -17,6 +17,9 @@ import imageRoutes from "./routes/imageRoutes.js";
 import playerStatsRoutes from "./routes/playerStatsRoutes.js";
 import pdfRoutes from "./routes/pdfRoutes.js";
 
+// import middleware
+import errorHandler from "./middleware/errorHandler.js";
+
 // Load Environment Variables
 dotenv.config();
 
@@ -83,5 +86,15 @@ app.use("/api/articles", articleRoutes);
 app.use("/api/image", imageRoutes);
 app.use("/api/player-stats", playerStatsRoutes);
 app.use("/api/pdf", pdfRoutes);
+
+// 404 handler for undefined routes
+app.use((req, res, next) => {
+  const error = new Error(`Route ${req.originalUrl} not found`);
+  error.statusCode = 404;
+  next(error);
+});
+
+// Error handling middleware (must be the last middleware)
+app.use(errorHandler);
 
 export default app;

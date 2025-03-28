@@ -30,8 +30,39 @@ This is the backend API for the Etros Basketball Team website. It provides authe
 ✅ Automated FIBA box score PDF processing  
 ✅ Duplicate match detection  
 ✅ Preview functionality for PDF uploads  
-✅ Comprehensive error handling  
+✅ Comprehensive error handling with detailed error codes  
+✅ Consistent API response format  
 ✅ Swagger API documentation
+
+## 🚨 Error Handling
+
+The API includes a robust error handling system:
+
+✅ Consistent error response format  
+✅ Detailed error messages with error codes  
+✅ Field-level validation errors  
+✅ Machine-readable error codes for frontend handling  
+✅ Proper HTTP status codes  
+✅ Documentation for all error types
+
+### Error Response Format
+
+```json
+{
+  "success": false,
+  "status": 400,
+  "message": "Error message explaining what went wrong",
+  "errorCode": "ERROR_CODE",
+  "details": {
+    // Additional error details (specific to the error)
+  }
+}
+```
+
+### Documentation
+
+- See [src/docs/error-handling.md](src/docs/error-handling.md) for implementation details
+- See [src/docs/error-codes.md](src/docs/error-codes.md) for a comprehensive list of error codes
 
 ## 🔧 Installation
 

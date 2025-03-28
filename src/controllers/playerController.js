@@ -1,85 +1,97 @@
 import Player from "../models/Player.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import { AppError } from "../middleware/errorHandler.js";
 
 // **1️⃣ Get All Players**
-export const getPlayers = async (req, res) => {
-  try {
-    const players = await Player.find();
-    res.status(200).json(players);
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
-  }
-};
+export const getPlayers = asyncHandler(async (req, res) => {
+  const players = await Player.find();
+
+  res.status(200).json({
+    success: true,
+    count: players.length,
+    data: players,
+  });
+});
 
 // **2️⃣ Get a Single Player**
-export const getPlayer = async (req, res) => {
-  try {
-    const player = await Player.findById(req.params.id);
-    if (!player) {
-      return res.status(404).json({ message: "Player not found" });
-    }
-    res.status(200).json(player);
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+export const getPlayer = asyncHandler(async (req, res) => {
+  const player = await Player.findById(req.params.id);
+
+  if (!player) {
+    throw new AppError("Player not found", 404, "PLAYER_NOT_FOUND");
   }
-};
+
+  res.status(200).json({
+    success: true,
+    data: player,
+  });
+});
 
 // **3️⃣ Create a New Player (Admin Only)**
-export const createPlayer = async (req, res) => {
-  try {
-    const { name, position, height, weight, stats, bornYear } = req.body;
+export const createPlayer = asyncHandler(async (req, res) => {
+  const { name, position, height, weight, stats, bornYear } = req.body;
 
-    // Check if player already exists
-    const playerExists = await Player.findOne({ name });
-    if (playerExists) {
-      return res.status(400).json({ message: "Player already exists" });
-    }
-
-    // Create new player
-    const newPlayer = await Player.create({
-      name,
-      bornYear,
-      position,
-      height,
-      weight,
-      stats,
+  // Validate required fields
+  if (!name) {
+    throw new AppError("Name is required", 400, "MISSING_FIELDS", {
+      field: "name",
     });
-
-    res.status(201).json(newPlayer);
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
   }
-};
+
+  // Check if player already exists
+  const playerExists = await Player.findOne({ name });
+  if (playerExists) {
+    throw new AppError(
+      "Player with this name already exists",
+      409,
+      "PLAYER_EXISTS"
+    );
+  }
+
+  // Create new player
+  const newPlayer = await Player.create({
+    name,
+    bornYear,
+    position,
+    height,
+    weight,
+    stats,
+  });
+
+  res.status(201).json({
+    success: true,
+    data: newPlayer,
+  });
+});
 
 // **4️⃣ Update a Player (Admin Only)**
-export const updatePlayer = async (req, res) => {
-  try {
-    const updatedPlayer = await Player.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
+export const updatePlayer = asyncHandler(async (req, res) => {
+  const updatedPlayer = await Player.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { new: true, runValidators: true }
+  );
 
-    if (!updatedPlayer) {
-      return res.status(404).json({ message: "Player not found" });
-    }
-
-    res.status(200).json(updatedPlayer);
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+  if (!updatedPlayer) {
+    throw new AppError("Player not found", 404, "PLAYER_NOT_FOUND");
   }
-};
+
+  res.status(200).json({
+    success: true,
+    data: updatedPlayer,
+  });
+});
 
 // **5️⃣ Delete a Player (Admin Only)**
-export const deletePlayer = async (req, res) => {
-  try {
-    const player = await Player.findByIdAndDelete(req.params.id);
+export const deletePlayer = asyncHandler(async (req, res) => {
+  const player = await Player.findByIdAndDelete(req.params.id);
 
-    if (!player) {
-      return res.status(404).json({ message: "Player not found" });
-    }
-
-    res.status(200).json({ message: "Player deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+  if (!player) {
+    throw new AppError("Player not found", 404, "PLAYER_NOT_FOUND");
   }
-};
+
+  res.status(200).json({
+    success: true,
+    message: "Player deleted successfully",
+  });
+});

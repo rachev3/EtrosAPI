@@ -1,11 +1,13 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import User from "../models/User.js";
+import { AppError } from "./errorHandler.js";
+import asyncHandler from "../utils/asyncHandler.js";
 
 dotenv.config();
 
 // **Middleware to verify JWT and authenticate user**
-export const protect = async (req, res, next) => {
+export const protect = asyncHandler(async (req, res, next) => {
   let token;
 
   // Check if Authorization header exists and starts with "Bearer"
@@ -13,30 +15,74 @@ export const protect = async (req, res, next) => {
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
   ) {
-    try {
-      // Extract token from the header
-      token = req.headers.authorization.split(" ")[1];
+    // Extract token from the header
+    token = req.headers.authorization.split(" ")[1];
 
+    if (!token) {
+      throw new AppError(
+        "Not authorized, invalid token format",
+        401,
+        "INVALID_TOKEN_FORMAT"
+      );
+    }
+
+    try {
       // Verify JWT
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      // Attach user object to request (excluding password)
-      req.user = await User.findById(decoded.id).select("-password");
+      // Find the user
+      const user = await User.findById(decoded.id).select("-password");
 
-      next(); // Move to the next middleware/controller
+      if (!user) {
+        throw new AppError(
+          "User belonging to this token no longer exists",
+          401,
+          "USER_NOT_FOUND"
+        );
+      }
+
+      // Attach user object to request
+      req.user = user;
+      next();
     } catch (error) {
-      res.status(401).json({ message: "Not authorized, invalid token" });
+      if (error.name === "JsonWebTokenError") {
+        throw new AppError(
+          "Not authorized, invalid token",
+          401,
+          "INVALID_TOKEN"
+        );
+      } else if (error.name === "TokenExpiredError") {
+        throw new AppError(
+          "Not authorized, token expired",
+          401,
+          "TOKEN_EXPIRED"
+        );
+      } else {
+        throw error; // Pass other errors to the global error handler
+      }
     }
   } else {
-    res.status(401).json({ message: "Not authorized, no token" });
+    throw new AppError("Not authorized, no token provided", 401, "NO_TOKEN");
   }
-};
+});
 
 // **Middleware to check if the user is an admin**
 export const isAdmin = (req, res, next) => {
-  if (req.user && req.user.role === "admin") {
-    next(); // User is admin, proceed
-  } else {
-    res.status(403).json({ message: "Access denied, admin only" });
+  if (!req.user) {
+    throw new AppError(
+      "User not authenticated",
+      401,
+      "AUTHENTICATION_REQUIRED"
+    );
   }
+
+  if (req.user.role !== "admin") {
+    throw new AppError(
+      "Access denied, admin privileges required",
+      403,
+      "ADMIN_REQUIRED"
+    );
+  }
+
+  next(); // User is admin, proceed
 };

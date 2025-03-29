@@ -5,8 +5,11 @@ import APIFeatures from "../utils/apiFeatures.js";
 
 export const getAllPlayerStats = async (req, res) => {
   try {
-    // Create a new APIFeatures instance with filtering
-    const features = new APIFeatures(PlayerStats.find(), req.query).filter();
+    // Create a new APIFeatures instance with filtering and sorting
+    const features = new APIFeatures(PlayerStats.find(), req.query)
+      .filter()
+      .sort();
+
     // Conditionally populate based on request
     if (req.query.populate) {
       features.query = features.query.populate("player match");

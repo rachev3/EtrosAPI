@@ -1,0 +1,66 @@
+# Players Sorting Examples
+
+# Sort by name (A-Z)
+GET http://localhost:5000/api/players?sort=name
+
+# Sort by weight (heaviest first)
+GET http://localhost:5000/api/players?sort=-weight
+
+# Sort by position, then by height (tallest first)
+GET http://localhost:5000/api/players?sort=position,-height
+
+# Sort by number (ascending)
+GET http://localhost:5000/api/players?sort=number
+
+# Sort by born year (youngest first)
+GET http://localhost:5000/api/players?sort=-bornYear
+
+# Player Stats Sorting Examples
+
+# Sort by points (highest first)
+GET http://localhost:5000/api/player-stats?sort=-points
+
+# Sort by efficiency rating (highest first)
+GET http://localhost:5000/api/player-stats?sort=-efficiency
+
+# Sort by rebounds, then by assists
+GET http://localhost:5000/api/player-stats?sort=-totalRebounds,-assists
+
+# Sort by three-point percentage (indirect)
+GET http://localhost:5000/api/player-stats?sort=-threePointsMade,-threePointsAttempted
+
+# Matches Sorting Examples
+
+# Sort by date (newest first)
+GET http://localhost:5000/api/matches?sort=-date
+
+# Sort by our score (highest first)
+GET http://localhost:5000/api/matches?sort=-ourScore
+
+# Sort by location, then by date
+GET http://localhost:5000/api/matches?sort=location,-date
+
+# Articles Sorting Examples
+
+# Sort by title (A-Z)
+GET http://localhost:5000/api/articles?sort=title
+
+# Sort by publication date (newest first)
+GET http://localhost:5000/api/articles?sort=-createdAt
+
+# Sort by author, then by date
+GET http://localhost:5000/api/articles?sort=author,-createdAt
+
+# Combined Filtering and Sorting Examples
+
+# Centers sorted by height (tallest first)
+GET http://localhost:5000/api/players?position=Center&sort=-height
+
+# High-scoring games (20+ points) sorted by efficiency
+GET http://localhost:5000/api/player-stats?totalPoints[gte]=20&sort=-efficiency
+
+# Home wins sorted by date (newest first)
+GET http://localhost:5000/api/matches?location=Home&result=Win&sort=-date
+
+# Articles by specific author, sorted by date
+GET http://localhost:5000/api/articles?author=Coach%20Williams&sort=-createdAt 

@@ -4,14 +4,8 @@ import APIFeatures from "../utils/apiFeatures.js";
 // **1️⃣ Get All Matches**
 export const getMatches = async (req, res) => {
   try {
-    // Create a new APIFeatures instance with filtering
-    const features = new APIFeatures(Match.find(), req.query).filter();
-
-    // Maintain default sorting by date (latest first)
-    const baseQuery = features.query;
-    if (!req.query.sort) {
-      features.query = baseQuery.sort({ date: -1 });
-    }
+    // Create a new APIFeatures instance with filtering and sorting
+    const features = new APIFeatures(Match.find(), req.query).filter().sort();
 
     const matches = await features.query;
 

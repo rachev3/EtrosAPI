@@ -6,7 +6,7 @@ import APIFeatures from "../utils/apiFeatures.js";
 // **1️⃣ Get All Players**
 export const getPlayers = asyncHandler(async (req, res) => {
   // Create a new APIFeatures instance with the Player model query and request query
-  const features = new APIFeatures(Player.find(), req.query).filter();
+  const features = new APIFeatures(Player.find(), req.query).filter().sort();
 
   const players = await features.query;
 

@@ -4,14 +4,8 @@ import APIFeatures from "../utils/apiFeatures.js";
 // **1️⃣ Get All Articles**
 export const getArticles = async (req, res) => {
   try {
-    // Create a new APIFeatures instance with filtering
-    const features = new APIFeatures(Article.find(), req.query).filter();
-
-    // Maintain default sorting by newest first
-    const baseQuery = features.query;
-    if (!req.query.sort) {
-      features.query = baseQuery.sort({ createdAt: -1 });
-    }
+    // Create a new APIFeatures instance with filtering and sorting
+    const features = new APIFeatures(Article.find(), req.query).filter().sort();
 
     const articles = await features.query;
 

@@ -5,11 +5,12 @@
  * - Filtering with comparison operators
  * - Array field filtering with $in and $all operators
  * - Support for multiple conditions on the same field
+ * - Sorting by single or multiple fields
  *
  * @example
  * // Basic usage
  * const features = new APIFeatures(Model.find(), req.query);
- * const results = await features.filter().query;
+ * const results = await features.filter().sort().query;
  */
 class APIFeatures {
   /**
@@ -80,6 +81,34 @@ class APIFeatures {
     );
 
     this.query = this.query.find(JSON.parse(queryStr));
+
+    return this;
+  }
+
+  /**
+   * Sorts the results based on the sort parameter
+   *
+   * @example
+   * // Sort by name in ascending order
+   * /api/resource?sort=name
+   *
+   * // Sort by name in descending order
+   * /api/resource?sort=-name
+   *
+   * // Sort by multiple fields (name ascending, age descending)
+   * /api/resource?sort=name,-age
+   *
+   * @returns {APIFeatures} Returns this for method chaining
+   */
+  sort() {
+    if (this.queryString.sort) {
+      // Handle comma-separated sort fields
+      const sortBy = this.queryString.sort.split(",").join(" ");
+      this.query = this.query.sort(sortBy);
+    } else {
+      // Default sort by createdAt descending if not specified
+      this.query = this.query.sort("-createdAt");
+    }
 
     return this;
   }

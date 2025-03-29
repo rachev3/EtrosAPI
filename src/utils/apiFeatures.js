@@ -6,11 +6,12 @@
  * - Array field filtering with $in and $all operators
  * - Support for multiple conditions on the same field
  * - Sorting by single or multiple fields
+ * - Pagination with page and limit parameters (defaults to all items on page 1)
  *
  * @example
  * // Basic usage
  * const features = new APIFeatures(Model.find(), req.query);
- * const results = await features.filter().sort().query;
+ * const results = await features.filter().sort().paginate().query;
  */
 class APIFeatures {
   /**
@@ -21,6 +22,7 @@ class APIFeatures {
   constructor(query, queryString) {
     this.query = query;
     this.queryString = queryString;
+    this.totalCount = 0;
   }
 
   /**
@@ -109,6 +111,50 @@ class APIFeatures {
       // Default sort by createdAt descending if not specified
       this.query = this.query.sort("-createdAt");
     }
+
+    return this;
+  }
+
+  /**
+   * Adds pagination to the query using page and limit parameters
+   * By default, returns all items on page 1 if no limit is specified
+   *
+   * @example
+   * // Get all items (default behavior)
+   * /api/resource
+   *
+   * // Get specific page with custom limit
+   * /api/resource?page=2&limit=10
+   *
+   * @returns {APIFeatures} Returns this for method chaining
+   */
+  async paginate() {
+    // Convert page and limit to numbers with defaults
+    // Default page is 1, default limit is Number.MAX_SAFE_INTEGER (effectively no limit)
+    const page = parseInt(this.queryString.page, 10) || 1;
+    const limit = this.queryString.limit
+      ? parseInt(this.queryString.limit, 10)
+      : Number.MAX_SAFE_INTEGER;
+    const skip = (page - 1) * limit;
+
+    // Calculate total documents for pagination metadata
+    // We need to clone the query to get the count without pagination
+    const countQuery = this.query.model.find(this.query.getFilter());
+    this.totalCount = await countQuery.countDocuments();
+
+    // Apply pagination to the original query
+    this.query = this.query.skip(skip).limit(limit);
+
+    // Add pagination metadata
+    this.paginationData = {
+      page,
+      limit: limit === Number.MAX_SAFE_INTEGER ? this.totalCount : limit,
+      totalPages:
+        limit === Number.MAX_SAFE_INTEGER
+          ? 1
+          : Math.ceil(this.totalCount / limit),
+      totalResults: this.totalCount,
+    };
 
     return this;
   }

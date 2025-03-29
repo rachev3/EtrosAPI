@@ -10,6 +10,9 @@ export const getAllPlayerStats = async (req, res) => {
       .filter()
       .sort();
 
+    // Apply pagination
+    await features.paginate();
+
     // Conditionally populate based on request
     if (req.query.populate) {
       features.query = features.query.populate("player match");
@@ -20,6 +23,7 @@ export const getAllPlayerStats = async (req, res) => {
     res.status(200).json({
       success: true,
       count: stats.length,
+      pagination: features.paginationData,
       data: stats,
     });
   } catch (error) {

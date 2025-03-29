@@ -1,0 +1,65 @@
+# Default Behavior Examples
+
+# Get all players (default behavior)
+GET http://localhost:5000/api/players
+
+# Get all player stats
+GET http://localhost:5000/api/player-stats
+
+# Get all matches
+GET http://localhost:5000/api/matches
+
+# Get all articles
+GET http://localhost:5000/api/articles
+
+# Pagination Examples
+
+# Get first 5 players
+GET http://localhost:5000/api/players?limit=5
+
+# Get second page with 5 players
+GET http://localhost:5000/api/players?page=2&limit=5
+
+# Get first 10 player stats
+GET http://localhost:5000/api/player-stats?limit=10
+
+# Get first 5 player stats for a specific match 
+GET http://localhost:5000/api/player-stats?match=match_id_here&limit=5
+
+# Get first 5 player stats sorted by efficiency 
+GET http://localhost:5000/api/player-stats?sort=-efficiency&limit=5
+
+# Get first 2 matches
+GET http://localhost:5000/api/matches?limit=2
+
+# Get second page of matches, 2 per page
+GET http://localhost:5000/api/matches?page=2&limit=2
+
+# Get first 3 articles
+GET http://localhost:5000/api/articles?limit=3
+
+# Combined Examples (Filtering + Sorting + Pagination)
+
+# All Centers, sorted by height
+GET http://localhost:5000/api/players?position=Center&sort=-height
+
+# First 3 Centers, sorted by height
+GET http://localhost:5000/api/players?position=Center&sort=-height&limit=3
+
+# All players born after 1998, sorted by name
+GET http://localhost:5000/api/players?bornYear[gt]=1998&sort=name
+
+# Second page of players born after 1998, 3 per page, sorted by name
+GET http://localhost:5000/api/players?bornYear[gt]=1998&sort=name&page=2&limit=3
+
+# All high-scoring performances, sorted by efficiency
+GET http://localhost:5000/api/player-stats?points[gte]=20&sort=-efficiency
+
+# First 5 high-scoring performances, sorted by efficiency
+GET http://localhost:5000/api/player-stats?points[gte]=20&sort=-efficiency&limit=5
+
+# All home matches that were wins, sorted by date
+GET http://localhost:5000/api/matches?location=Home&result=Win&sort=-date
+
+# First 5 home matches that were wins, sorted by date
+GET http://localhost:5000/api/matches?location=Home&result=Win&sort=-date&limit=5 

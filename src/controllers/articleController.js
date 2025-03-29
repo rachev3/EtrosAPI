@@ -7,11 +7,15 @@ export const getArticles = async (req, res) => {
     // Create a new APIFeatures instance with filtering and sorting
     const features = new APIFeatures(Article.find(), req.query).filter().sort();
 
+    // Apply pagination
+    await features.paginate();
+
     const articles = await features.query;
 
     res.status(200).json({
       success: true,
       count: articles.length,
+      pagination: features.paginationData,
       data: articles,
     });
   } catch (error) {

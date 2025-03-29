@@ -8,11 +8,16 @@ export const getPlayers = asyncHandler(async (req, res) => {
   // Create a new APIFeatures instance with the Player model query and request query
   const features = new APIFeatures(Player.find(), req.query).filter().sort();
 
+  // Apply pagination
+  await features.paginate();
+
   const players = await features.query;
 
+  // Return response with pagination data
   res.status(200).json({
     success: true,
     count: players.length,
+    pagination: features.paginationData,
     data: players,
   });
 });

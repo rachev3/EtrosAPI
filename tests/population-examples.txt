@@ -1,0 +1,55 @@
+# Basic Population Examples
+
+# Get player stats with player information
+GET http://localhost:5000/api/player-stats?populate=player
+
+# Get player stats with match information
+GET http://localhost:5000/api/player-stats?populate=match
+
+# Get player stats with both player and match information
+GET http://localhost:5000/api/player-stats?populate=player,match
+
+# Get matches with player stats populated
+GET http://localhost:5000/api/matches?populate=playerStats
+
+# Get players with stats history populated
+GET http://localhost:5000/api/players?populate=statsHistory
+
+# Single Resource Population Examples
+
+# Get a specific player with stats history
+GET http://localhost:5000/api/players/{playerId}?populate=statsHistory
+
+# Get a specific match with player stats
+GET http://localhost:5000/api/matches/{matchId}?populate=playerStats
+
+# Get a specific match with player stats that include player details
+GET http://localhost:5000/api/matches/{matchId}?populate=playerStats.player
+
+# Selective Field Population Examples
+
+# Get player stats with only player name and number
+GET http://localhost:5000/api/player-stats?populate=player:name,number
+
+# Get player stats with player details and match date/opponent
+GET http://localhost:5000/api/player-stats?populate=player:name,number,position;match:opponent,date
+
+# Get matches with minimal player stats info
+GET http://localhost:5000/api/matches?populate=playerStats:player,points,assists
+
+# Get a specific player with selected stats fields
+GET http://localhost:5000/api/players/{playerId}?populate=statsHistory:points,assists,rebounds
+
+# Combined Examples (Filtering + Sorting + Pagination + Population)
+
+# Get all high-scoring performances with player details
+GET http://localhost:5000/api/player-stats?points[gte]=20&sort=-points&populate=player
+
+# Get second page of high-scoring performances with player and match details
+GET http://localhost:5000/api/player-stats?points[gte]=20&sort=-efficiency&page=2&limit=5&populate=player,match
+
+# Get all home matches that were wins with player stats
+GET http://localhost:5000/api/matches?location=Home&result=Win&sort=-date&populate=playerStats
+
+# Get Center players with their stats history
+GET http://localhost:5000/api/players?position=Center&sort=-height&populate=statsHistory 

@@ -7,11 +7,12 @@
  * - Support for multiple conditions on the same field
  * - Sorting by single or multiple fields
  * - Pagination with page and limit parameters (defaults to all items on page 1)
+ * - Optional population of related data
  *
  * @example
  * // Basic usage
  * const features = new APIFeatures(Model.find(), req.query);
- * const results = await features.filter().sort().paginate().query;
+ * const results = await features.filter().sort().paginate().populate().query;
  */
 class APIFeatures {
   /**
@@ -155,6 +156,47 @@ class APIFeatures {
           : Math.ceil(this.totalCount / limit),
       totalResults: this.totalCount,
     };
+
+    return this;
+  }
+
+  /**
+   * Populates referenced fields in the results based on the populate parameter
+   *
+   * @example
+   * // Populate one field
+   * /api/resource?populate=field1
+   *
+   * // Populate multiple fields
+   * /api/resource?populate=field1,field2
+   *
+   * // Populate selected fields with specific selection
+   * /api/resource?populate=field1:name,age;field2:title
+   *
+   * @returns {APIFeatures} Returns this for method chaining
+   */
+  populate() {
+    if (this.queryString.populate) {
+      // If populate param exists, parse it
+      const populateFields = this.queryString.populate.split(",");
+
+      // Process each field to populate
+      populateFields.forEach((field) => {
+        // Check if there's a selection specified with field:selection
+        if (field.includes(":")) {
+          const [fieldName, selection] = field.split(":");
+          // Convert selection to space-separated string for mongoose
+          const select = selection.replace(/;/g, " ");
+          this.query = this.query.populate({
+            path: fieldName,
+            select,
+          });
+        } else {
+          // Simple population without selection
+          this.query = this.query.populate(field);
+        }
+      });
+    }
 
     return this;
   }

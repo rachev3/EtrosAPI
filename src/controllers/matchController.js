@@ -10,6 +10,9 @@ export const getMatches = async (req, res) => {
     // Apply pagination
     await features.paginate();
 
+    // Apply population if requested
+    features.populate();
+
     const matches = await features.query;
 
     res.status(200).json({
@@ -30,13 +33,39 @@ export const getMatches = async (req, res) => {
 // **2️⃣ Get a Single Match**
 export const getMatch = async (req, res) => {
   try {
-    const match = await Match.findById(req.params.id);
+    // Create a base query
+    let query = Match.findById(req.params.id);
+
+    // Apply population if requested
+    if (req.query.populate) {
+      const populateFields = req.query.populate.split(",");
+
+      populateFields.forEach((field) => {
+        // Check if there's a selection specified with field:selection
+        if (field.includes(":")) {
+          const [fieldName, selection] = field.split(":");
+          // Convert selection to space-separated string for mongoose
+          const select = selection.replace(/;/g, " ");
+          query = query.populate({
+            path: fieldName,
+            select,
+          });
+        } else {
+          // Simple population without selection
+          query = query.populate(field);
+        }
+      });
+    }
+
+    const match = await query;
+
     if (!match) {
       return res.status(404).json({
         success: false,
         message: "Match not found",
       });
     }
+
     res.status(200).json({
       success: true,
       data: match,

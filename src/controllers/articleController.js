@@ -10,6 +10,9 @@ export const getArticles = async (req, res) => {
     // Apply pagination
     await features.paginate();
 
+    // Apply population if requested
+    features.populate();
+
     const articles = await features.query;
 
     res.status(200).json({

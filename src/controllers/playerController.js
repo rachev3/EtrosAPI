@@ -11,6 +11,9 @@ export const getPlayers = asyncHandler(async (req, res) => {
   // Apply pagination
   await features.paginate();
 
+  // Apply population if requested
+  features.populate();
+
   const players = await features.query;
 
   // Return response with pagination data
@@ -24,7 +27,31 @@ export const getPlayers = asyncHandler(async (req, res) => {
 
 // **2️⃣ Get a Single Player**
 export const getPlayer = asyncHandler(async (req, res) => {
-  const player = await Player.findById(req.params.id);
+  // Create a base query
+  let query = Player.findById(req.params.id);
+
+  // Apply population if requested
+  if (req.query.populate) {
+    const populateFields = req.query.populate.split(",");
+
+    populateFields.forEach((field) => {
+      // Check if there's a selection specified with field:selection
+      if (field.includes(":")) {
+        const [fieldName, selection] = field.split(":");
+        // Convert selection to space-separated string for mongoose
+        const select = selection.replace(/;/g, " ");
+        query = query.populate({
+          path: fieldName,
+          select,
+        });
+      } else {
+        // Simple population without selection
+        query = query.populate(field);
+      }
+    });
+  }
+
+  const player = await query;
 
   if (!player) {
     throw new AppError("Player not found", 404, "PLAYER_NOT_FOUND");

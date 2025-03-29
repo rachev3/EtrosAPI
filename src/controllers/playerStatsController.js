@@ -13,10 +13,8 @@ export const getAllPlayerStats = async (req, res) => {
     // Apply pagination
     await features.paginate();
 
-    // Conditionally populate based on request
-    if (req.query.populate) {
-      features.query = features.query.populate("player match");
-    }
+    // Apply population if requested
+    features.populate();
 
     const stats = await features.query;
 

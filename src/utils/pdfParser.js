@@ -243,11 +243,14 @@ const extractTeamStats = (lines, isEtrosHome) => {
     freeThrowsAttempted: 0,
     offensiveRebounds: 0,
     defensiveRebounds: 0,
-    totalAssists: 0,
-    totalSteals: 0,
-    totalBlocks: 0,
-    totalTurnovers: 0,
-    totalFouls: 0,
+    totalRebounds: 0,
+    assists: 0,
+    steals: 0,
+    blocks: 0,
+    turnovers: 0,
+    fouls: 0,
+    plusMinus: 0,
+    efficiency: 0,
     totalPoints: 0,
   };
 
@@ -296,12 +299,14 @@ const extractTeamStats = (lines, isEtrosHome) => {
         const statsStart = timeIndex + 9;
         stats.offensiveRebounds = Number(parts[statsStart]);
         stats.defensiveRebounds = Number(parts[statsStart + 1]);
-        // Skip total rebounds
-        stats.totalAssists = Number(parts[statsStart + 3]);
-        stats.totalTurnovers = Number(parts[statsStart + 4]);
-        stats.totalSteals = Number(parts[statsStart + 5]);
-        stats.totalBlocks = Number(parts[statsStart + 6]);
-        stats.totalFouls = Number(parts[statsStart + 7]);
+        stats.totalRebounds = Number(parts[statsStart + 2]);
+        stats.assists = Number(parts[statsStart + 3]);
+        stats.turnovers = Number(parts[statsStart + 4]);
+        stats.steals = Number(parts[statsStart + 5]);
+        stats.blocks = Number(parts[statsStart + 6]);
+        stats.fouls = Number(parts[statsStart + 7]);
+        stats.plusMinus = Number(parts[statsStart + 8]);
+        stats.efficiency = Number(parts[statsStart + 9]);
         stats.totalPoints = Number(parts[parts.length - 1]);
       }
     } catch (error) {

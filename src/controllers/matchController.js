@@ -1,9 +1,20 @@
 import Match from "../models/Match.js";
+import APIFeatures from "../utils/apiFeatures.js";
 
 // **1️⃣ Get All Matches**
 export const getMatches = async (req, res) => {
   try {
-    const matches = await Match.find().sort({ date: -1 }); // Sort by latest match
+    // Create a new APIFeatures instance with filtering
+    const features = new APIFeatures(Match.find(), req.query).filter();
+
+    // Maintain default sorting by date (latest first)
+    const baseQuery = features.query;
+    if (!req.query.sort) {
+      features.query = baseQuery.sort({ date: -1 });
+    }
+
+    const matches = await features.query;
+
     res.status(200).json({
       success: true,
       count: matches.length,
@@ -181,18 +192,21 @@ const updateStatsAfterMatch = async (match) => {
       freeThrowsAttempted: 0,
       offensiveRebounds: 0,
       defensiveRebounds: 0,
-      totalAssists: 0,
-      totalSteals: 0,
-      totalBlocks: 0,
-      totalTurnovers: 0,
-      totalFouls: 0,
+      totalRebounds: 0,
+      assists: 0,
+      steals: 0,
+      blocks: 0,
+      turnovers: 0,
+      fouls: 0,
+      plusMinus: 0,
+      efficiency: 0,
       totalPoints: 0,
     };
 
     // Aggregate all player stats into team stats
     populatedMatch.playerStats.forEach((playerStat) => {
       teamStats.fieldGoalsMade += playerStat.fieldGoalsMade || 0;
-      teamStats.fieldGoalsAttempted += playerStat.fieldgoalsAttempted || 0;
+      teamStats.fieldGoalsAttempted += playerStat.fieldGoalsAttempted || 0;
       teamStats.twoPointsMade += playerStat.twoPointsMade || 0;
       teamStats.twoPointsAttempted += playerStat.twoPointsAttempted || 0;
       teamStats.threePointsMade += playerStat.threePointsMade || 0;
@@ -201,11 +215,14 @@ const updateStatsAfterMatch = async (match) => {
       teamStats.freeThrowsAttempted += playerStat.freeThrowsAttempted || 0;
       teamStats.offensiveRebounds += playerStat.offensiveRebounds || 0;
       teamStats.defensiveRebounds += playerStat.defensiveRebounds || 0;
-      teamStats.totalAssists += playerStat.totalAssists || 0;
-      teamStats.totalSteals += playerStat.totalSteals || 0;
-      teamStats.totalBlocks += playerStat.totalBlocks || 0;
-      teamStats.totalTurnovers += playerStat.totalTurnovers || 0;
-      teamStats.totalFouls += playerStat.totalFouls || 0;
+      teamStats.totalRebounds += playerStat.totalRebounds || 0;
+      teamStats.assists += playerStat.assists || 0;
+      teamStats.steals += playerStat.steals || 0;
+      teamStats.blocks += playerStat.blocks || 0;
+      teamStats.turnovers += playerStat.turnovers || 0;
+      teamStats.fouls += playerStat.fouls || 0;
+      teamStats.plusMinus += playerStat.plusMinus || 0;
+      teamStats.efficiency += playerStat.efficiency || 0;
       teamStats.totalPoints += playerStat.totalPoints || 0;
     });
 

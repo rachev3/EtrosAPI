@@ -1,10 +1,14 @@
 import Player from "../models/Player.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { AppError } from "../middleware/errorHandler.js";
+import APIFeatures from "../utils/apiFeatures.js";
 
 // **1️⃣ Get All Players**
 export const getPlayers = asyncHandler(async (req, res) => {
-  const players = await Player.find();
+  // Create a new APIFeatures instance with the Player model query and request query
+  const features = new APIFeatures(Player.find(), req.query).filter();
+
+  const players = await features.query;
 
   res.status(200).json({
     success: true,

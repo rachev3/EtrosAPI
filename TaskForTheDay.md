@@ -1,179 +1,71 @@
-Title: Extract and Integrate Basketball Match Statistics from PDF
-──────────────────────────────
+# Assignment: Enhance Basketball API with Advanced Query Features
 
-Overview: ⚠️ (Mostly Completed)
-Develop a Node.js Express (type=module) service that processes a basketball match statistic PDF, extracts both team-level and player-level data, checks for duplicate entries, and uploads the parsed data to the EtrosAPI database. Only admins should be permitted to perform the upload.
+## Overview
 
-──────────────────────────────
+Our current RESTful API for the basketball team application supports basic CRUD operations on models such as Articles, Players, Matches, and PlayerStats. Your assignment is to extend the API by implementing advanced query features that allow for flexible data retrieval. These enhancements include:
 
-Objectives
-✅ Create a secure module (admin-only access) to accept and process a basketball statistic PDF.
-✅ Parse and extract key data fields including overall match details, team statistics, and individual player statistics.
-✅ Implement a duplicate check mechanism to avoid re-uploading the same match statistics.
-✅ Integrate with the existing EtrosAPI endpoints to store the extracted data.
-✅ Provide robust error handling and logging.
-✅ Implement preview functionality for data review before final submission.
+- **Filtering:** Allow clients to narrow down results based on model attributes.
+- **Sorting:** Enable clients to order results based on one or more fields.
+- **Pagination:** Support retrieving data in manageable chunks.
+- **Populating Relations (Optional):** Provide an option to include related data (for example, player details within player statistics).
 
-────────────────────────────── 2. Requirements & Functional Specifications
+---
 
-A. Input and PDF Parsing
-✅ Accept a PDF file with a layout similar to "FIBA_Box_Score_GOCh_vs_ETR_04_qnuari.pdf"
-✅ Use a Node.js PDF parsing library (using pdf-parse) to extract the text content.
-✅ Identify and extract:
-✅ Match metadata: game number, date, start time, attendance, game duration
-✅ Team-level statistics:
-✅ Overall points
-✅ Player-level statistics: player name, minutes played, field goal stats, etc.
+## Detailed Requirements
 
-B. Data Transformation and Validation
-✅ Map the extracted data to your database schema
-✅ Validate and convert numerical and date fields comprehensively
-✅ Handle edge cases such as "DNP" entries
+### 1. Filtering
 
-C. Duplicate Checking
-✅ Implement check to prevent duplicate uploads by comparing opponent and match date
-✅ Skip if duplicate is detected
-✅ Proper duplicate handling response
+- **Objective:** Implement a mechanism to filter data based on query parameters.
+- **What to Do:**
+  - Accept query parameters that correspond to the model’s fields.
+  - Support advanced filtering operators, such as greater than, less than, and their inclusive variants.
+  - Ensure that the API parses these parameters and applies the corresponding filters to the data retrieval process.
+- **Example Use Case:** A client may want to retrieve players who play a specific position or who are above a certain age.
 
-D. Preview and Review Functionality
-✅ Implement initial preview endpoint for extracted data
-✅ Show match details (date, teams, venue)
-✅ Display team statistics summary
-✅ List player statistics with validation warnings
-✅ Flag potential issues (missing data, inconsistencies)
-✅ Implement confirmation endpoint for final data submission
-✅ Allow admin review and adjustment before final submission
+### 2. Sorting
 
-E. API Integration
-✅ Utilize EtrosAPI's endpoints:
-✅ Inserting new match records
-✅ Adding team-level statistics
-✅ Adding individual player statistics
-✅ Error handling and logging implementation
+- **Objective:** Allow clients to sort the results returned by the API.
+- **What to Do:**
+  - Introduce a query parameter that specifies the sorting criteria.
+  - Support both ascending and descending order through a simple notation (for example, a prefix to indicate descending order).
+  - Make sure that the API can sort on multiple fields if needed.
+- **Example Use Case:** A client could request player statistics ordered by points scored in descending order, followed by rebounds.
 
-F. Security
-✅ Ensure that only authenticated admin users can perform the upload
-✅ Implementation of authentication middleware and authorization checks
+### 3. Pagination
 
-────────────────────────────── 3. Technical Implementation
+- **Objective:** Implement pagination to manage large sets of data efficiently.
+- **What to Do:**
+  - Use query parameters to determine the page number and the number of records per page.
+  - Calculate and apply the correct offset (skip) based on the current page.
+  - Optionally, return additional metadata like the total number of pages or records.
+- **Example Use Case:** When retrieving articles, clients should be able to request a specific page with a defined number of articles per page.
 
-A. Environment & Tools
-✅ Use Node.js with Express.js (type=module)
-✅ PDF parsing library implementation
-✅ Authentication/authorization setup
+### 4. Optional Population of Relations
 
-B. Implementation Steps
+- **Objective:** Allow the API to include related data in the response when requested, but make it optional.
+- **What to Do:**
+  - Provide a way for clients to request that certain relations be populated (for example, including player information within player statistics).
+  - Ensure that if the client does not request population, the API returns only the primary model data.
+  - The implementation should avoid unnecessary data fetching unless explicitly requested by the client.
+- **Example Use Case:** A client may request player statistics with the associated player’s details (like name, age, and position) only when needed.
 
-✅ PDF Ingestion and Parsing:
-✅ API endpoint for file uploads with admin protection
-✅ PDF parsing implementation
-✅ Text segmentation logic
+---
 
-✅ Data Extraction & Mapping:
-✅ Header identification
-✅ Data type conversion
-✅ Data organization
+## Implementation Guidelines
 
-✅ Duplicate Check Logic:
-✅ Database querying for duplicates
-✅ Duplicate handling
+- **Utility Class Approach:**  
+  Consider creating a reusable utility (or helper class) that encapsulates the functionality for filtering, sorting, and pagination. This class should be chainable so that each of the features can be applied in sequence to the database query.
 
-✅ Preview Implementation:
-✅ Create preview endpoint
-✅ Implement data validation checks
-✅ Add warning flags for potential issues
-✅ Create confirmation endpoint
+- **Optional Population:**  
+  Design the solution so that relation population is triggered only when the client explicitly indicates it. This could be done by checking for a specific query parameter. If the parameter is not present, the API should return just the base data.
 
-✅ API Communication:
-✅ POST new match data
-✅ Proper error handling and retries
+- **Consistency Across Models:**  
+  Ensure that the advanced query features work uniformly across all endpoints (Articles, Players, Matches, PlayerStats). For models like PlayerStats that naturally involve related data, document clearly how the optional population can be activated.
 
-✅ Testing and Logging:
-⚠️ Unit tests (failing)
-⚠️ Integration tests (partially working)
-✅ Comprehensive logging
+---
 
-────────────────────────────── 4. Additional Considerations
-
-✅ Scalability:
-✅ Concurrent PDF processing
-✅ Job queues
-
-✅ Extensibility:
-✅ Modular design for future adjustments
-✅ Documentation for modifications
-
-✅ Security:
-✅ Admin-only access
-✅ Authentication/authorization
-
-✅ Documentation:
-✅ Inline documentation
-✅ README
-✅ Deployment instructions
-
-────────────────────────────── 5. Deliverables
-
-✅ Codebase:
-✅ Secure PDF upload endpoint
-✅ PDF parsing module
-✅ Duplicate check implementation
-✅ Preview functionality
-✅ Confirmation endpoint
-✅ API integration
-✅ Tests
-✅ Deployment instructions
-✅ API documentation
-
-────────────────────────────── 6. Acceptance Criteria
-
-✅ Accurate extraction of match, team, and player statistics
-✅ Reliable duplicate checking
-✅ Data insertion with proper error handling
-✅ Admin-only access
-✅ Preview functionality with validation warnings
-✅ Confirmation mechanism for final submission
-✅ Code modularity and documentation
-✅ Test coverage
-
-STATUS SUMMARY:
-⚠️ Most tasks completed, but with testing issues:
-
-- ✅ PDF parsing and data extraction
-- ✅ Admin security implementation
-- ✅ Duplicate checking
-- ✅ Preview functionality
-- ✅ API integration
-- ✅ Error handling
-- ⚠️ Testing suite (needs fixes)
-- ✅ Documentation
-- ✅ Deployment instructions
-- ✅ Code modularity
-- ✅ Job queue implementation
-
-Next Steps:
-⚠️ Critical fixes needed before production:
-
-1. Fix Unit Tests:
-
-   - Properly implement PDF parser mock in controller tests
-   - Fix mock implementation to return expected data structure
-   - Update test assertions to match actual behavior
-
-2. Fix Integration Tests:
-
-   - Provide valid sample PDF file for testing
-   - Update test fixtures with correct PDF structure
-   - Add more comprehensive error handling tests
-
-3. Test Infrastructure:
-   - Add proper test setup and teardown procedures
-   - Implement better test data management
-   - Add test coverage reporting
-
-Future Enhancements (After Test Fixes):
-
-1. Consider implementing performance monitoring
-2. Add automated deployment pipeline
-3. Implement data backup and recovery procedures
-4. Consider adding analytics for PDF processing metrics
+- **Documentation:**  
+  Update the API documentation to include:
+  - A detailed explanation of each new query parameter.
+  - Examples of requests and responses demonstrating filtering, sorting, pagination, and optional population.
+  - Guidance on how to enable relation population when needed.

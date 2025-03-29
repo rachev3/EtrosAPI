@@ -1,10 +1,19 @@
 import PlayerStats from "../models/PlayerStats.js";
 import Match from "../models/Match.js";
 import Player from "../models/Player.js";
+import APIFeatures from "../utils/apiFeatures.js";
 
 export const getAllPlayerStats = async (req, res) => {
   try {
-    const stats = await PlayerStats.find().populate("player match");
+    // Create a new APIFeatures instance with filtering
+    const features = new APIFeatures(PlayerStats.find(), req.query).filter();
+    // Conditionally populate based on request
+    if (req.query.populate) {
+      features.query = features.query.populate("player match");
+    }
+
+    const stats = await features.query;
+
     res.status(200).json({
       success: true,
       count: stats.length,
@@ -78,12 +87,25 @@ export const addPlayerStats = async (req, res) => {
     const {
       matchId,
       playerId,
-      points,
-      rebounds,
+      fieldGoalsMade,
+      fieldGoalsAttempted,
+      twoPointsMade,
+      twoPointsAttempted,
+      threePointsMade,
+      threePointsAttempted,
+      freeThrowsMade,
+      freeThrowsAttempted,
+      offensiveRebounds,
+      defensiveRebounds,
+      totalRebounds,
       assists,
       steals,
       blocks,
-      minutesPlayed,
+      turnovers,
+      fouls,
+      plusMinus,
+      efficiency,
+      points,
     } = req.body;
 
     const match = await Match.findById(matchId);
@@ -103,17 +125,33 @@ export const addPlayerStats = async (req, res) => {
     const newStats = await PlayerStats.create({
       match: matchId,
       player: playerId,
-      points,
-      rebounds,
-      assists,
-      steals,
-      blocks,
-      minutesPlayed,
+      // Shooting stats
+      fieldGoalsMade: fieldGoalsMade || 0,
+      fieldGoalsAttempted: fieldGoalsAttempted || 0,
+      twoPointsMade: twoPointsMade || 0,
+      twoPointsAttempted: twoPointsAttempted || 0,
+      threePointsMade: threePointsMade || 0,
+      threePointsAttempted: threePointsAttempted || 0,
+      freeThrowsMade: freeThrowsMade || 0,
+      freeThrowsAttempted: freeThrowsAttempted || 0,
+      offensiveRebounds: offensiveRebounds || 0,
+      defensiveRebounds: defensiveRebounds || 0,
+      totalRebounds: totalRebounds || 0,
+      assists: assists || 0,
+      steals: steals || 0,
+      blocks: blocks || 0,
+      turnovers: turnovers || 0,
+      fouls: fouls || 0,
+      plusMinus: plusMinus || 0,
+      efficiency: efficiency || 0,
+      points: points || 0,
     });
 
+    // Add stats to player's history
     player.statsHistory.push(newStats._id);
     await player.save();
 
+    // Add stats to match
     match.playerStats.push(newStats._id);
     await match.save();
 

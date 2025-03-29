@@ -1,0 +1,24 @@
+# Player Filtering Examples
+GET http://localhost:5000/api/players?position=PointGuard
+GET http://localhost:5000/api/players?bornYear[gt]=1990
+GET http://localhost:5000/api/players?height[gte]=6'5"
+GET http://localhost:5000/api/players?position=Center&number[lt]=20
+
+# PlayerStats Filtering Examples
+GET http://localhost:5000/api/player-stats?points[gte]=20
+GET http://localhost:5000/api/player-stats?assists[gt]=5&totalRebounds[gt]=10
+GET http://localhost:5000/api/player-stats?blocks[gte]=3&populate=true
+GET http://localhost:5000/api/player-stats?efficiency[gt]=15
+GET http://localhost:5000/api/player-stats?plusMinus[gt]=0&fieldGoalsAttempted[gt]=10
+
+# Match Filtering Examples
+GET http://localhost:5000/api/matches?result=Win
+GET http://localhost:5000/api/matches?ourScore[gt]=100
+GET http://localhost:5000/api/matches?location=Home&result=Win
+
+# Article Filtering Examples
+GET http://localhost:5000/api/articles?author=Admin
+GET http://localhost:5000/api/articles?createdAt[gt]=2024-01-01
+
+# Complex Filtering Example
+GET http://localhost:5000/api/players?bornYear[gt]=1995&position[in]=["Center","PowerForward"]

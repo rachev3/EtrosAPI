@@ -1,10 +1,25 @@
 import Article from "../models/Article.js";
+import APIFeatures from "../utils/apiFeatures.js";
 
 // **1️⃣ Get All Articles**
 export const getArticles = async (req, res) => {
   try {
-    const articles = await Article.find().sort({ createdAt: -1 }); // Sort by newest first
-    res.status(200).json(articles);
+    // Create a new APIFeatures instance with filtering
+    const features = new APIFeatures(Article.find(), req.query).filter();
+
+    // Maintain default sorting by newest first
+    const baseQuery = features.query;
+    if (!req.query.sort) {
+      features.query = baseQuery.sort({ createdAt: -1 });
+    }
+
+    const articles = await features.query;
+
+    res.status(200).json({
+      success: true,
+      count: articles.length,
+      data: articles,
+    });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
@@ -17,7 +32,7 @@ export const getArticle = async (req, res) => {
     if (!article) {
       return res.status(404).json({ message: "Article not found" });
     }
-    res.status(200).json(article);
+    res.status(200).json({ success: true, data: article });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }

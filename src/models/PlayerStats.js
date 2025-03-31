@@ -15,7 +15,7 @@ const playerStatsSchema = new mongoose.Schema(
 
     // ✅ Individual player performance in this match
     fieldGoalsMade: { type: Number, default: 0 },
-    fieldgoalsAttempted: { type: Number, default: 0 },
+    fieldGoalsAttempted: { type: Number, default: 0 },
     twoPointsMade: { type: Number, default: 0 },
     twoPointsAttempted: { type: Number, default: 0 },
     threePointsMade: { type: Number, default: 0 },
@@ -34,7 +34,7 @@ const playerStatsSchema = new mongoose.Schema(
     efficiency: { type: Number, default: 0 },
     points: { type: Number, default: 0 },
   },
-  { timestamps: true }
+  { timestamps: true, toJSON: { virtuals: true } }
 );
 
 const PlayerStats = mongoose.model("PlayerStats", playerStatsSchema);

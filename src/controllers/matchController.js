@@ -40,8 +40,11 @@ export const getMatch = async (req, res) => {
     if (req.query.populate) {
       const populateFields = req.query.populate.split(",");
 
+      // Create a structured object to hold nested population options
+      const populateOptions = {};
+
       populateFields.forEach((field) => {
-        // Check if there's a selection specified with field:selection
+        // Case 1: Field with selection specified (field:selection)
         if (field.includes(":")) {
           const [fieldName, selection] = field.split(":");
           // Convert selection to space-separated string for mongoose
@@ -50,10 +53,61 @@ export const getMatch = async (req, res) => {
             path: fieldName,
             select,
           });
-        } else {
-          // Simple population without selection
+        }
+        // Case 2: Field with dot notation for nested population (field.nestedField)
+        else if (field.includes(".")) {
+          const parts = field.split(".");
+          let currentPath = parts[0];
+
+          // Initialize the path in our options object if it doesn't exist
+          if (!populateOptions[currentPath]) {
+            populateOptions[currentPath] = {
+              path: currentPath,
+              populate: {},
+            };
+          }
+
+          // For paths with multiple nesting levels (e.g., field1.field2.field3)
+          if (parts.length > 2) {
+            let currentOption = populateOptions[currentPath];
+
+            // Process each nesting level except the last one
+            for (let i = 1; i < parts.length - 1; i++) {
+              const nestedPath = parts[i];
+
+              if (!currentOption.populate.path) {
+                currentOption.populate = {
+                  path: nestedPath,
+                  populate: {},
+                };
+              } else if (currentOption.populate.path !== nestedPath) {
+                // Handle case where the same parent has different children
+                currentOption.populate = {
+                  path: nestedPath,
+                  populate: {},
+                };
+              }
+
+              currentOption = currentOption.populate;
+            }
+
+            // Set the deepest level
+            currentOption.populate = { path: parts[parts.length - 1] };
+          }
+          // Simple one-level nesting (e.g., field1.field2)
+          else {
+            populateOptions[currentPath].populate = { path: parts[1] };
+          }
+        }
+        // Case 3: Simple field without nesting or selection
+        else {
           query = query.populate(field);
         }
+      });
+
+      // Apply all structured nested populate options
+      Object.values(populateOptions).forEach((option) => {
+        query = query.populate(option);
       });
     }
 

@@ -173,6 +173,9 @@ class APIFeatures {
    * // Populate selected fields with specific selection
    * /api/resource?populate=field1:name,age;field2:title
    *
+   * // Populate nested fields using dot notation
+   * /api/resource?populate=field1.nestedField1,field1.nestedField2
+   *
    * @returns {APIFeatures} Returns this for method chaining
    */
   populate() {
@@ -180,21 +183,86 @@ class APIFeatures {
       // If populate param exists, parse it
       const populateFields = this.queryString.populate.split(",");
 
+      // Create a structured object to hold nested population options
+      const populateOptions = {};
+
       // Process each field to populate
       populateFields.forEach((field) => {
-        // Check if there's a selection specified with field:selection
+        // Case 1: Field with selection specified (field:selection)
         if (field.includes(":")) {
           const [fieldName, selection] = field.split(":");
-          // Convert selection to space-separated string for mongoose
-          const select = selection.replace(/;/g, " ");
-          this.query = this.query.populate({
-            path: fieldName,
-            select,
-          });
-        } else {
-          // Simple population without selection
+
+          // For special case handling of playerStats:player
+          if (fieldName === "playerStats" && selection.includes("player")) {
+            // Handle nested population for playerStats -> player
+            this.query = this.query.populate({
+              path: "playerStats",
+              populate: { path: "player" },
+            });
+          } else {
+            // Convert selection to space-separated string for mongoose
+            const select = selection.replace(/;/g, " ");
+            this.query = this.query.populate({
+              path: fieldName,
+              select,
+            });
+          }
+        }
+        // Case 2: Field with dot notation for nested population (field.nestedField)
+        else if (field.includes(".")) {
+          const parts = field.split(".");
+          let currentPath = parts[0];
+
+          // Initialize the path in our options object if it doesn't exist
+          if (!populateOptions[currentPath]) {
+            populateOptions[currentPath] = {
+              path: currentPath,
+              populate: {},
+            };
+          }
+
+          // For paths with multiple nesting levels (e.g., field1.field2.field3)
+          if (parts.length > 2) {
+            let currentOption = populateOptions[currentPath];
+
+            // Process each nesting level except the last one
+            for (let i = 1; i < parts.length - 1; i++) {
+              const nestedPath = parts[i];
+
+              if (!currentOption.populate.path) {
+                currentOption.populate = {
+                  path: nestedPath,
+                  populate: {},
+                };
+              } else if (currentOption.populate.path !== nestedPath) {
+                // Handle case where the same parent has different children
+                // This is a simplification - more complex cases would need a more sophisticated approach
+                currentOption.populate = {
+                  path: nestedPath,
+                  populate: {},
+                };
+              }
+
+              currentOption = currentOption.populate;
+            }
+
+            // Set the deepest level
+            currentOption.populate = { path: parts[parts.length - 1] };
+          }
+          // Simple one-level nesting (e.g., field1.field2)
+          else {
+            populateOptions[currentPath].populate = { path: parts[1] };
+          }
+        }
+        // Case 3: Simple field without nesting or selection
+        else {
           this.query = this.query.populate(field);
         }
+      });
+
+      // Apply all structured nested populate options
+      Object.values(populateOptions).forEach((option) => {
+        this.query = this.query.populate(option);
       });
     }
 

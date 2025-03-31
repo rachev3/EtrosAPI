@@ -1,54 +1,16 @@
 # Database Models Documentation
 
-## User Model
+## Overview
 
-Represents a user in the system with authentication capabilities.
+This document describes the database models used in the basketball team API, including their fields, relationships, and population capabilities.
 
-### Schema Fields:
+## Models and Their Relationships
 
-- `username` (String)
-
-  - Required
-  - Unique
-  - Trimmed
-  - Description: User's unique username
-
-- `email` (String)
-
-  - Required
-  - Unique
-  - Trimmed
-  - Lowercase
-  - Validated with email regex
-  - Description: User's email address
-
-- `password` (String)
-
-  - Required
-  - Minimum length: 6 characters
-  - Description: Hashed password (automatically hashed before saving)
-
-- `role` (String)
-  - Enum: ["user", "admin"]
-  - Default: "user"
-  - Description: User's role for authorization
-
-### Timestamps
-
-- `createdAt`: Date when the user was created
-- `updatedAt`: Date when the user was last updated
-
-### Methods
-
-- `matchPassword(enteredPassword)`: Compares entered password with stored hash
-
----
-
-## Player Model
+### Player Model
 
 Represents a basketball player in the team.
 
-### Schema Fields:
+#### Schema Fields:
 
 - `name` (String)
 
@@ -91,19 +53,21 @@ Represents a basketball player in the team.
 - `statsHistory` (Array of ObjectIds)
   - References: PlayerStats model
   - Description: List of player's statistics from all matches
+  - Population: Can be populated to include full stats details
+  - Example: `GET /api/players?populate=statsHistory` or `GET /api/players?populate=statsHistory:points,assists`
 
-### Timestamps
+#### Timestamps
 
 - `createdAt`: Date when the player was added
 - `updatedAt`: Date when the player was last updated
 
 ---
 
-## Match Model
+### Match Model
 
 Represents a basketball match.
 
-### Schema Fields:
+#### Schema Fields:
 
 - `opponent` (String)
 
@@ -168,31 +132,37 @@ Represents a basketball match.
 - `playerStats` (Array of ObjectIds)
   - References: PlayerStats model
   - Description: Individual statistics for each player in this match
+  - Population: Can be populated to include full player stats
+  - Example: `GET /api/matches?populate=playerStats` or `GET /api/matches?populate=playerStats.player`
 
-### Timestamps
+#### Timestamps
 
 - `createdAt`: Date when the match was created
 - `updatedAt`: Date when the match was last updated
 
 ---
 
-## PlayerStats Model
+### PlayerStats Model
 
 Represents individual player statistics for a specific match.
 
-### Schema Fields:
+#### Schema Fields:
 
 - `match` (ObjectId)
 
   - Required
   - References: Match model
   - Description: The match these statistics belong to
+  - Population: Can be populated to include match details
+  - Example: `GET /api/player-stats?populate=match`
 
 - `player` (ObjectId)
 
   - Required
   - References: Player model
   - Description: The player these statistics belong to
+  - Population: Can be populated to include player details
+  - Example: `GET /api/player-stats?populate=player`
 
 - Performance Statistics:
   - `fieldGoalsMade` (Number, default: 0)
@@ -214,18 +184,18 @@ Represents individual player statistics for a specific match.
   - `efficiency` (Number, default: 0)
   - `totalPoints` (Number, default: 0)
 
-### Timestamps
+#### Timestamps
 
 - `createdAt`: Date when the stats were recorded
 - `updatedAt`: Date when the stats were last updated
 
 ---
 
-## Article Model
+### Article Model
 
 Represents news articles or blog posts.
 
-### Schema Fields:
+#### Schema Fields:
 
 - `title` (String)
 
@@ -265,18 +235,18 @@ Represents news articles or blog posts.
   - Default: []
   - Description: URLs of images used in the article
 
-### Timestamps
+#### Timestamps
 
 - `createdAt`: Date when the article was published
 - `updatedAt`: Date when the article was last modified
 
 ---
 
-## MatchPdfUpload Model
+### MatchPdfUpload Model
 
 Represents PDF uploads containing match statistics.
 
-### Schema Fields:
+#### Schema Fields:
 
 - `fileName` (String)
 
@@ -288,6 +258,8 @@ Represents PDF uploads containing match statistics.
   - Required
   - References: User model
   - Description: User who uploaded the PDF
+  - Population: Can be populated to include user details
+  - Example: `GET /api/pdf-uploads?populate=uploadedBy`
 
 - `matchDate` (Date)
 
@@ -315,11 +287,87 @@ Represents PDF uploads containing match statistics.
   - Optional
   - References: Match model
   - Description: Associated match after processing
+  - Population: Can be populated to include match details
+  - Example: `GET /api/pdf-uploads?populate=matchId`
 
 - `createdAt` (Date)
   - Default: Current date
   - Description: Upload timestamp
 
-### Indexes
+#### Indexes
 
 - Unique compound index on `matchDate` and `opponent` to prevent duplicate uploads
+
+---
+
+### User Model
+
+Represents a user in the system with authentication capabilities.
+
+#### Schema Fields:
+
+- `username` (String)
+
+  - Required
+  - Unique
+  - Trimmed
+  - Description: User's unique username
+
+- `email` (String)
+
+  - Required
+  - Unique
+  - Trimmed
+  - Lowercase
+  - Validated with email regex
+  - Description: User's email address
+
+- `password` (String)
+
+  - Required
+  - Minimum length: 6 characters
+  - Description: Hashed password (automatically hashed before saving)
+
+- `role` (String)
+  - Enum: ["user", "admin"]
+  - Default: "user"
+  - Description: User's role for authorization
+
+#### Timestamps
+
+- `createdAt`: Date when the user was created
+- `updatedAt`: Date when the user was last updated
+
+#### Methods
+
+- `matchPassword(enteredPassword)`: Compares entered password with stored hash
+
+## Model Relationships Overview
+
+### Direct References
+
+- PlayerStats → Player (one-to-one)
+- PlayerStats → Match (one-to-one)
+- MatchPdfUpload → User (one-to-one)
+- MatchPdfUpload → Match (one-to-one)
+
+### Array References
+
+- Player → PlayerStats (one-to-many)
+- Match → PlayerStats (one-to-many)
+
+### Population Examples
+
+```
+# Get player with all stats
+GET /api/players/123?populate=statsHistory
+
+# Get match with all player stats and their players
+GET /api/matches/123?populate=playerStats.player
+
+# Get player stats with both player and match details
+GET /api/player-stats?populate=player,match
+
+# Get PDF upload with user and match details
+GET /api/pdf-uploads?populate=uploadedBy,matchId
+```

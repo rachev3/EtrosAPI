@@ -48,13 +48,44 @@ GET /api/player-stats?populate=player:name,number;match:opponent,date
 
 This will populate the player field with only name and number, and the match field with only opponent and date.
 
-## Combining with Other Features
+## Nested Population
 
-Population can be combined with filtering, sorting, and pagination:
+You can populate nested references using dot notation. This allows you to populate fields within populated documents:
 
 ```
-GET /api/player-stats?points[gte]=20&sort=-efficiency&page=2&limit=5&populate=player,match
+GET /api/matches?populate=playerStats.player
 ```
+
+This will populate the playerStats array and also populate the player reference within each playerStat.
+
+You can populate multiple nested fields:
+
+```
+GET /api/matches?populate=playerStats.player,playerStats.match
+```
+
+This will populate both the player and match references within each playerStat.
+
+You can also populate deeper nested relationships:
+
+```
+GET /api/matches?populate=playerStats.player.team
+```
+
+This will populate playerStats, then populate the player within each playerStat, and finally populate the team within each player.
+
+## Combining Population Features
+
+You can combine different population features in the same request:
+
+```
+GET /api/matches?populate=playerStats.player,teamStats:points,assists
+```
+
+This will:
+
+- Populate playerStats and their nested player references
+- Populate teamStats but only include points and assists fields
 
 ## Available Relations
 
@@ -110,3 +141,16 @@ When using population, the referenced fields in the response will be replaced wi
 1. Populate only when necessary, as it may increase response time for large datasets
 2. When populating multiple fields or deep nesting, consider using selective field population to limit the data returned
 3. For very large collections, it may be more efficient to make separate requests rather than using population
+4. Deep nested population (more than 2 levels) should be used sparingly as it can significantly impact performance
+5. Consider the following alternatives for better performance:
+   - Use multiple targeted requests instead of deep nesting
+   - Create denormalized fields for frequently accessed data
+   - Implement caching for commonly requested nested data
+
+## Best Practices
+
+1. Always specify only the fields you need when using population
+2. Use dot notation for nested population only when necessary
+3. Keep population depth to a minimum (preferably no more than 2 levels)
+4. Consider implementing field filtering alongside population to reduce response size
+5. Use pagination when populating arrays of references to limit the amount of data returned

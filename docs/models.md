@@ -32,7 +32,8 @@ Represents a basketball player in the team.
 - `position` (Array of Strings)
 
   - Optional
-  - Enum: ["PointGuard", "ShootingGuard", "PowerForward", "SmallForward", "Center"]
+  - Can contain multiple positions from: ["PointGuard", "ShootingGuard", "PowerForward", "SmallForward", "Center"]
+  - Example: A player can be both ["PointGuard", "ShootingGuard"]
   - Description: Player's position(s) on the team
 
 - `height` (String)
@@ -56,10 +57,9 @@ Represents a basketball player in the team.
   - Population: Can be populated to include full stats details
   - Example: `GET /api/players?populate=statsHistory` or `GET /api/players?populate=statsHistory:points,assists`
 
-#### Timestamps
+#### Schema Options
 
-- `createdAt`: Date when the player was added
-- `updatedAt`: Date when the player was last updated
+- `timestamps: true`: Automatically manages createdAt and updatedAt
 
 ---
 
@@ -122,12 +122,13 @@ Represents a basketball match.
     - `freeThrowsAttempted` (Number, default: 0)
     - `offensiveRebounds` (Number, default: 0)
     - `defensiveRebounds` (Number, default: 0)
-    - `totalAssists` (Number, default: 0)
-    - `totalSteals` (Number, default: 0)
-    - `totalBlocks` (Number, default: 0)
-    - `totalTurnovers` (Number, default: 0)
-    - `totalFouls` (Number, default: 0)
-    - `totalPoints` (Number, default: 0)
+    - `totalRebounds` (Number, default: 0)
+    - `assists` (Number, default: 0)
+    - `steals` (Number, default: 0)
+    - `blocks` (Number, default: 0)
+    - `turnovers` (Number, default: 0)
+    - `fouls` (Number, default: 0)
+    - `points` (Number, default: 0)
 
 - `playerStats` (Array of ObjectIds)
   - References: PlayerStats model
@@ -135,10 +136,9 @@ Represents a basketball match.
   - Population: Can be populated to include full player stats
   - Example: `GET /api/matches?populate=playerStats` or `GET /api/matches?populate=playerStats.player`
 
-#### Timestamps
+#### Schema Options
 
-- `createdAt`: Date when the match was created
-- `updatedAt`: Date when the match was last updated
+- `timestamps: true`: Automatically manages createdAt and updatedAt
 
 ---
 
@@ -166,7 +166,7 @@ Represents individual player statistics for a specific match.
 
 - Performance Statistics:
   - `fieldGoalsMade` (Number, default: 0)
-  - `fieldgoalsAttempted` (Number, default: 0)
+  - `fieldGoalsAttempted` (Number, default: 0)
   - `twoPointsMade` (Number, default: 0)
   - `twoPointsAttempted` (Number, default: 0)
   - `threePointsMade` (Number, default: 0)
@@ -175,19 +175,20 @@ Represents individual player statistics for a specific match.
   - `freeThrowsAttempted` (Number, default: 0)
   - `offensiveRebounds` (Number, default: 0)
   - `defensiveRebounds` (Number, default: 0)
-  - `totalAssists` (Number, default: 0)
-  - `totalSteals` (Number, default: 0)
-  - `totalBlocks` (Number, default: 0)
-  - `totalTurnovers` (Number, default: 0)
-  - `totalFouls` (Number, default: 0)
+  - `totalRebounds` (Number, default: 0)
+  - `assists` (Number, default: 0)
+  - `steals` (Number, default: 0)
+  - `blocks` (Number, default: 0)
+  - `turnovers` (Number, default: 0)
+  - `fouls` (Number, default: 0)
   - `plusMinus` (Number, default: 0)
   - `efficiency` (Number, default: 0)
-  - `totalPoints` (Number, default: 0)
+  - `points` (Number, default: 0)
 
-#### Timestamps
+#### Schema Options
 
-- `createdAt`: Date when the stats were recorded
-- `updatedAt`: Date when the stats were last updated
+- `timestamps: true`: Automatically manages createdAt and updatedAt
+- `toJSON: { virtuals: true }`: Includes virtual fields when converting to JSON
 
 ---
 
@@ -235,10 +236,9 @@ Represents news articles or blog posts.
   - Default: []
   - Description: URLs of images used in the article
 
-#### Timestamps
+#### Schema Options
 
-- `createdAt`: Date when the article was published
-- `updatedAt`: Date when the article was last modified
+- `timestamps: true`: Automatically manages createdAt and updatedAt
 
 ---
 
@@ -333,10 +333,9 @@ Represents a user in the system with authentication capabilities.
   - Default: "user"
   - Description: User's role for authorization
 
-#### Timestamps
+#### Schema Options
 
-- `createdAt`: Date when the user was created
-- `updatedAt`: Date when the user was last updated
+- `timestamps: true`: Automatically manages createdAt and updatedAt
 
 #### Methods
 
@@ -374,10 +373,9 @@ Represents user comments on articles.
   - Default: true
   - Description: Visibility status of the comment
 
-#### Timestamps
+#### Schema Options
 
-- `createdAt`: Date when the comment was created
-- `updatedAt`: Date when the comment was last updated
+- `timestamps: true`: Automatically manages createdAt and updatedAt
 
 #### Authorization
 

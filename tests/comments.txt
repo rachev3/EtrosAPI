@@ -1,0 +1,137 @@
+# Comment API Test Requests for Postman
+
+Base URL: http://localhost:5000
+
+## 1. Get All Comments
+GET /api/comments
+Headers:
+- None required
+
+Query Parameters (optional):
+- populate=author,article
+- sort=-createdAt
+- page=1
+- limit=10
+
+## 2. Get Comments for Specific Article
+GET /api/comments/article/{articleId}
+Headers:
+- None required
+
+Query Parameters (optional):
+- populate=author
+- sort=-createdAt
+
+## 3. Get Comments by User
+GET /api/comments/user/{userId}
+Headers:
+- None required
+
+Query Parameters (optional):
+- populate=article
+- sort=-createdAt
+
+## 4. Create New Comment
+POST /api/comments
+Headers:
+- Authorization: Bearer {your_jwt_token}
+- Content-Type: application/json
+
+Body:
+{
+    "content": "This is a test comment",
+    "articleId": "{target_article_id}"
+}
+
+## 5. Update Comment
+PUT /api/comments/{commentId}
+Headers:
+- Authorization: Bearer {your_jwt_token}
+- Content-Type: application/json
+
+Body:
+{
+    "content": "This is an updated comment"
+}
+
+## 6. Delete Comment
+DELETE /api/comments/{commentId}
+Headers:
+- Authorization: Bearer {your_jwt_token}
+
+## Example Test Scenarios
+
+### Scenario 1: Comment Creation and Management
+1. Create a new comment
+2. Verify comment was created
+3. Update the comment
+4. Verify update was successful
+5. Delete the comment
+6. Verify deletion was successful
+
+### Scenario 2: Article Comments
+1. Get all comments for an article
+2. Create multiple comments on the article
+3. Verify comment count increased
+4. Test pagination and sorting
+
+### Scenario 3: User Comments
+1. Get all comments by a specific user
+2. Create comments as the user
+3. Verify user's comment count
+4. Test filtering and population
+
+### Error Test Cases
+1. Try to create comment without authentication
+Expected: 401 Unauthorized
+
+2. Try to update someone else's comment
+Expected: 403 Forbidden
+
+3. Try to delete someone else's comment
+Expected: 403 Forbidden
+
+4. Try to create comment with invalid article ID
+Expected: 404 Not Found
+
+5. Try to create comment with empty content
+Expected: 400 Bad Request
+
+### Example Request Bodies
+
+1. Valid Comment Creation:
+```json
+{
+    "content": "This is a great article! Very informative.",
+    "articleId": "60d21b4667d0d8992e610c82"
+}
+```
+
+2. Invalid Comment Creation (Empty Content):
+```json
+{
+    "content": "",
+    "articleId": "60d21b4667d0d8992e610c82"
+}
+```
+
+3. Comment Update:
+```json
+{
+    "content": "Updated comment with more detailed feedback"
+}
+```
+
+### Query Parameter Examples
+
+1. Populated Response:
+GET /api/comments?populate=author,article
+
+2. Sorted and Paginated:
+GET /api/comments?sort=-createdAt&page=1&limit=10
+
+3. Filtered by Date:
+GET /api/comments?createdAt[gte]=2024-01-01&createdAt[lte]=2024-12-31
+
+4. Complex Query:
+GET /api/comments?populate=author,article&sort=-createdAt&page=1&limit=10&isVisible=true

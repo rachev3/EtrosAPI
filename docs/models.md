@@ -342,6 +342,54 @@ Represents a user in the system with authentication capabilities.
 
 - `matchPassword(enteredPassword)`: Compares entered password with stored hash
 
+### Comment Model
+
+Represents user comments on articles.
+
+#### Schema Fields:
+
+- `content` (String)
+
+  - Required
+  - Trimmed
+  - Description: The content of the comment
+
+- `author` (ObjectId)
+
+  - Required
+  - References: User model
+  - Description: The user who created the comment
+  - Population: Can be populated to include user details
+  - Example: `GET /api/comments?populate=author`
+
+- `article` (ObjectId)
+
+  - Required
+  - References: Article model
+  - Description: The article the comment belongs to
+  - Population: Can be populated to include article details
+  - Example: `GET /api/comments?populate=article`
+
+- `isVisible` (Boolean)
+  - Default: true
+  - Description: Visibility status of the comment
+
+#### Timestamps
+
+- `createdAt`: Date when the comment was created
+- `updatedAt`: Date when the comment was last updated
+
+#### Authorization
+
+- Only authenticated users can create comments
+- Only the comment author can update or delete their own comments
+- Comments cannot be modified by other users or admins
+
+#### Indexes
+
+- Index on `article` and `createdAt` for efficient article comment queries
+- Index on `author` for efficient user comment queries
+
 ## Model Relationships Overview
 
 ### Direct References
@@ -350,6 +398,8 @@ Represents a user in the system with authentication capabilities.
 - PlayerStats → Match (one-to-one)
 - MatchPdfUpload → User (one-to-one)
 - MatchPdfUpload → Match (one-to-one)
+- Comment → User (one-to-one)
+- Comment → Article (one-to-one)
 
 ### Array References
 
@@ -370,4 +420,19 @@ GET /api/player-stats?populate=player,match
 
 # Get PDF upload with user and match details
 GET /api/pdf-uploads?populate=uploadedBy,matchId
+
+# Get comments with author details
+GET /api/comments?populate=author
+
+# Get comments with article details
+GET /api/comments?populate=article
+
+# Get comments with both author and article details
+GET /api/comments?populate=author,article
+
+# Get article comments sorted by creation date
+GET /api/comments/article/{articleId}?sort=-createdAt
+
+# Get user comments with article details
+GET /api/comments/user/{userId}?populate=article
 ```

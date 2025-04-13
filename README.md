@@ -13,12 +13,10 @@ This is the backend API for the Etros Basketball Team website. It provides authe
 - Cloudinary (Image storage)
 - PDF-Parse (Match statistics processing)
 - Jest (Testing)
-- Swagger (API Documentation)
 
 ## 🌍 Live API & Documentation
 
 - 🚀 **Live API:** [https://etrosapi.onrender.com](https://etrosapi.onrender.com)
-- 📚 **Swagger API Docs:** [https://etrosapi.onrender.com/api-docs](https://etrosapi.onrender.com/api-docs)
 
 ## ✨ Features
 
@@ -31,8 +29,7 @@ This is the backend API for the Etros Basketball Team website. It provides authe
 ✅ Duplicate match detection  
 ✅ Preview functionality for PDF uploads  
 ✅ Comprehensive error handling with detailed error codes  
-✅ Consistent API response format  
-✅ Swagger API documentation
+✅ Consistent API response format
 
 ## 🚨 Error Handling
 
@@ -196,8 +193,6 @@ src/__tests__/
 | GET    | `/api/matches/:id` | Get match by ID |
 | POST   | `/api/matches`     | Create match    |
 | PUT    | `/api/matches/:id` | Update match    |
-
-✅ **Full API documentation:** [Swagger UI](https://etrosapi.onrender.com/api-docs)
 
 ## 📊 PDF Processing
 

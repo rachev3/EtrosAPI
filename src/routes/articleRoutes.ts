@@ -5,8 +5,8 @@ import {
   createArticle,
   updateArticle,
   deleteArticle,
-} from "../controllers/articleController.js";
-import { protect, isAdmin } from "../middleware/authMiddleware.js";
+} from "../controllers/articleController";
+import { protect, isAdmin } from "../middleware/authMiddleware";
 
 const router: Router = express.Router();
 

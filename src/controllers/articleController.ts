@@ -1,9 +1,9 @@
-import Article from "../models/Article.js";
-import APIFeatures from "../utils/apiFeatures.js";
-import { ControllerHandler, IdParam } from "../types/express/index.js";
-import { AppError } from "../middleware/errorHandler.js";
-import asyncHandler from "../utils/asyncHandler.js";
-import { IArticle, ArticleDocument } from "../types/models/Article.js";
+import Article from "../models/Article";
+import APIFeatures from "../utils/apiFeatures";
+import { ControllerHandler, IdParam } from "../types/express/index";
+import { AppError } from "../middleware/errorHandler";
+import asyncHandler from "../utils/asyncHandler";
+import { IArticle } from "../types/models/Article";
 
 interface ArticleRequestBody {
   title: string;

@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import {
   PlayerStatsDocument,
   PlayerStatsModel,
-} from "../types/models/PlayerStats.js";
+} from "../types/models/PlayerStats";
 
 const playerStatsSchema = new mongoose.Schema(
   {

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { ErrorCode } from "../types/index.js";
+import { ErrorCode } from "../types/index";
 
 interface MongooseError extends Error {
   code?: number;

@@ -6,8 +6,8 @@ import {
   addPlayerStats,
   updatePlayerStats,
   deletePlayerStats,
-} from "../controllers/playerStatsController.js";
-import { protect, isAdmin } from "../middleware/authMiddleware.js";
+} from "../controllers/playerStatsController";
+import { protect, isAdmin } from "../middleware/authMiddleware";
 
 const router: Router = express.Router();
 

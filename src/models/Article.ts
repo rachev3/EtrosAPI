@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { ArticleDocument, ArticleModel } from "../types/models/Article.js";
+import { ArticleDocument, ArticleModel } from "../types/models/Article";
 
 const articleSchema = new mongoose.Schema(
   {

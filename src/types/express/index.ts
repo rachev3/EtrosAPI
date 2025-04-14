@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { ParamsDictionary, Query } from "express-serve-static-core";
-import { UserDocument } from "../models/User.js";
+import { UserDocument } from "../models/User";
 
 export interface AuthRequest extends Request {
   user?: UserDocument;
@@ -53,7 +53,7 @@ export type ControllerHandler<
 > = (
   req: TypedRequest<B, P, Q>,
   res: Response,
-  next?: NextFunction
+  next: NextFunction
 ) => Promise<any> | void;
 
 export interface IdParam extends ParamsDictionary {

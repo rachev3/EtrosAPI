@@ -1,13 +1,13 @@
-import PlayerStats from "../models/PlayerStats.js";
-import Match from "../models/Match.js";
-import Player from "../models/Player.js";
-import APIFeatures from "../utils/apiFeatures.js";
+import PlayerStats from "../models/PlayerStats";
+import Match from "../models/Match";
+import Player from "../models/Player";
+import APIFeatures from "../utils/apiFeatures";
 import { Request, Response } from "express";
-import { TypedRequest } from "../types/express/index.js";
-import { AppError } from "../middleware/errorHandler.js";
-import asyncHandler from "../utils/asyncHandler.js";
-import { IPlayerStats } from "../types/models/PlayerStats.js";
-import { ObjectId } from "../types/index.js";
+import { TypedRequest } from "../types/express/index";
+import { AppError } from "../middleware/errorHandler";
+import asyncHandler from "../utils/asyncHandler";
+import { IPlayerStats } from "../types/models/PlayerStats";
+import { ObjectId } from "../types/index";
 
 interface PlayerStatsRequestBody {
   matchId: string;

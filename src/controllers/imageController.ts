@@ -1,7 +1,7 @@
-import cloudinary from "../config/cloudinary.js";
+import cloudinary from "../config/cloudinary";
 import { Request, Response } from "express";
-import { AppError } from "../middleware/errorHandler.js";
-import asyncHandler from "../utils/asyncHandler.js";
+import { AppError } from "../middleware/errorHandler";
+import asyncHandler from "../utils/asyncHandler";
 
 interface DeletePhotoRequestBody {
   fileName: string;
@@ -33,7 +33,7 @@ export const uploadPhoto = asyncHandler(
         }
       );
 
-      uploadStream.end(req.file.buffer);
+      uploadStream.end(req.file!.buffer);
     }).catch((error) => {
       throw new AppError("Upload failed", 500, "UPLOAD_FAILED", { error });
     });

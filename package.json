@@ -2,16 +2,16 @@
   "name": "api",
   "version": "1.0.0",
   "main": "dist/server.js",
+  "type": "commonjs",
   "scripts": {
     "start": "node dist/server.js",
-    "dev": "cross-env NODE_OPTIONS=--loader=ts-node/esm nodemon src/server.ts",
+    "dev": "nodemon --exec ts-node src/server.ts",
     "build": "tsc",
-    "seed": "cross-env NODE_OPTIONS=--loader=ts-node/esm ts-node src/utils/seeder.ts"
+    "seed": "ts-node src/utils/seeder.ts"
   },
   "keywords": [],
   "author": "Dimitar Rachev",
   "license": "MIT",
-  "type": "module",
   "description": "",
   "dependencies": {
     "bcrypt": "^5.1.1",

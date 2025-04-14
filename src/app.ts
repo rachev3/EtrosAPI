@@ -2,14 +2,14 @@ import express, { Express, Request, Response, NextFunction } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 
-import authRoutes from "./routes/authRoutes.js";
-import playerRoutes from "./routes/playerRoutes.js";
-import matchRoutes from "./routes/matchRoutes.js";
-import articleRoutes from "./routes/articleRoutes.js";
-import imageRoutes from "./routes/imageRoutes.js";
-import playerStatsRoutes from "./routes/playerStatsRoutes.js";
+import authRoutes from "./routes/authRoutes";
+import playerRoutes from "./routes/playerRoutes";
+import matchRoutes from "./routes/matchRoutes";
+import articleRoutes from "./routes/articleRoutes";
+import imageRoutes from "./routes/imageRoutes";
+import playerStatsRoutes from "./routes/playerStatsRoutes";
 
-import errorHandler from "./middleware/errorHandler.js";
+import errorHandler from "./middleware/errorHandler";
 
 dotenv.config();
 

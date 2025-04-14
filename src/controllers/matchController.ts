@@ -1,9 +1,9 @@
-import Match from "../models/Match.js";
-import APIFeatures from "../utils/apiFeatures.js";
+import Match from "../models/Match";
+import APIFeatures from "../utils/apiFeatures";
 import { Request, Response } from "express";
-import { TypedRequest } from "../types/express/index.js";
-import { AppError } from "../middleware/errorHandler.js";
-import asyncHandler from "../utils/asyncHandler.js";
+import { TypedRequest } from "../types/express/index";
+import { AppError } from "../middleware/errorHandler";
+import asyncHandler from "../utils/asyncHandler";
 import {
   IMatch,
   MatchDocument,

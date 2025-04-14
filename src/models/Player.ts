@@ -3,7 +3,7 @@ import {
   PlayerDocument,
   PlayerModel,
   PlayerPosition,
-} from "../types/models/Player.js";
+} from "../types/models/Player";
 
 const playerSchema = new mongoose.Schema(
   {

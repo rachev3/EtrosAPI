@@ -1,4 +1,4 @@
-import { BaseDocument } from "../index.js";
+import { BaseDocument } from "../index";
 import { Model } from "mongoose";
 
 export interface IArticle {

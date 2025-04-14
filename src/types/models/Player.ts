@@ -1,4 +1,4 @@
-import { BaseDocument, ObjectId } from "../index.js";
+import { BaseDocument, ObjectId } from "../index";
 import { Model } from "mongoose";
 
 export type PlayerPosition =

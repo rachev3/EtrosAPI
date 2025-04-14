@@ -1,7 +1,7 @@
 import express, { Router } from "express";
-import upload from "../middleware/uploadMiddleware.js";
-import { uploadPhoto, deletePhoto } from "../controllers/imageController.js";
-import { protect, isAdmin } from "../middleware/authMiddleware.js";
+import upload from "../middleware/uploadMiddleware";
+import { uploadPhoto, deletePhoto } from "../controllers/imageController";
+import { protect, isAdmin } from "../middleware/authMiddleware";
 
 const router: Router = express.Router();
 

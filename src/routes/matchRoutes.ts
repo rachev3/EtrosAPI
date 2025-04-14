@@ -5,8 +5,8 @@ import {
   createMatch,
   updateMatch,
   deleteMatch,
-} from "../controllers/matchController.js";
-import { protect, isAdmin } from "../middleware/authMiddleware.js";
+} from "../controllers/matchController";
+import { protect, isAdmin } from "../middleware/authMiddleware";
 
 const router: Router = express.Router();
 

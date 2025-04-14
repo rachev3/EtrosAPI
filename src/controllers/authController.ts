@@ -1,16 +1,16 @@
-import User from "../models/User.js";
+import User from "../models/User";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import asyncHandler from "../utils/asyncHandler.js";
-import { AppError } from "../middleware/errorHandler.js";
+import asyncHandler from "../utils/asyncHandler";
+import { AppError } from "../middleware/errorHandler";
 import { Response } from "express";
 import {
   AuthRequest,
   TypedRequest,
   TypedResponse,
-} from "../types/express/index.js";
-import { ApiResponse } from "../types/index.js";
-import { IUser, UserRole, UserDocument } from "../types/models/User.js";
+} from "../types/express/index";
+import { ApiResponse } from "../types/index";
+import { IUser, UserRole, UserDocument } from "../types/models/User";
 
 dotenv.config();
 

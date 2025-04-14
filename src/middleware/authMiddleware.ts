@@ -1,11 +1,11 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { Request, Response, NextFunction } from "express";
-import User from "../models/User.js";
-import { AppError } from "./errorHandler.js";
-import asyncHandler from "../utils/asyncHandler.js";
-import { JwtPayload } from "../types/index.js";
-import { AuthRequest } from "../types/express/index.js";
+import User from "../models/User";
+import { AppError } from "./errorHandler";
+import asyncHandler from "../utils/asyncHandler";
+import { JwtPayload } from "../types/index";
+import { AuthRequest } from "../types/express/index";
 
 dotenv.config();
 

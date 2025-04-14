@@ -5,8 +5,8 @@ import {
   createPlayer,
   updatePlayer,
   deletePlayer,
-} from "../controllers/playerController.js";
-import { protect, isAdmin } from "../middleware/authMiddleware.js";
+} from "../controllers/playerController";
+import { protect, isAdmin } from "../middleware/authMiddleware";
 
 const router: Router = express.Router();
 

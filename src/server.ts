@@ -1,5 +1,5 @@
-import app from "./app.js";
-import connectDB from "./config/db.js";
+import app from "./app";
+import connectDB from "./config/db";
 import { Server } from "http";
 
 const PORT: number = parseInt(process.env.PORT || "5000", 10);

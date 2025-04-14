@@ -1,9 +1,9 @@
-import Player from "../models/Player.js";
-import asyncHandler from "../utils/asyncHandler.js";
-import { AppError } from "../middleware/errorHandler.js";
-import APIFeatures from "../utils/apiFeatures.js";
+import Player from "../models/Player";
+import asyncHandler from "../utils/asyncHandler";
+import { AppError } from "../middleware/errorHandler";
+import APIFeatures from "../utils/apiFeatures";
 import { Request, Response } from "express";
-import { TypedRequest } from "../types/express/index.js";
+import { TypedRequest } from "../types/express/index";
 import {
   IPlayer,
   PlayerDocument,

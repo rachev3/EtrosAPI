@@ -4,7 +4,7 @@ import {
   MatchResult,
   MatchDocument,
   MatchModel,
-} from "../types/models/Match.js";
+} from "../types/models/Match";
 
 const matchSchema = new mongoose.Schema(
   {

@@ -8,7 +8,14 @@ import {
   IPlayer,
   PlayerDocument,
   PlayerPosition,
-} from "../types/models/Player.js";
+} from "../types/models/Player";
+import {
+  validateRequiredFields,
+  validateUnique,
+  validateEnum,
+  validateArray,
+  validateNumberRange,
+} from "../utils/validator";
 
 interface PlayerRequestBody {
   name: string;
@@ -95,52 +102,40 @@ export const getPlayer = asyncHandler(
 
 export const createPlayer = asyncHandler(
   async (req: TypedRequest<PlayerRequestBody>, res: Response) => {
-    const {
-      name,
-      number,
-      position,
-      height,
-      weight,
-      stats,
-      bornYear,
-      imageUrl,
-    } = req.body;
-
-    if (!name) {
-      throw new AppError("Name is required", 400, "MISSING_FIELDS", {
-        field: "name",
+    validateRequiredFields(req.body, ["name", "number", "bornYear"]);
+    await validateUnique(Player, "name", req.body.name, "name");
+    if (req.body.position) {
+      validateArray(req.body.position, 0, 5, "position");
+      req.body.position.forEach((pos: string) => {
+        validateEnum(
+          pos,
+          [
+            "PointGuard",
+            "ShootingGuard",
+            "PowerForward",
+            "SmallForward",
+            "Center",
+          ],
+          "position"
+        );
       });
     }
-
-    if (!number) {
-      throw new AppError("Number is required", 400, "MISSING_FIELDS", {
-        field: "number",
-      });
-    }
-
-    if (!bornYear) {
-      throw new AppError("Born year is required", 400, "MISSING_FIELDS", {
-        field: "bornYear",
-      });
-    }
-
-    const playerExists = await Player.findOne({ name });
-    if (playerExists) {
-      throw new AppError(
-        "Player with this name already exists",
-        409,
-        "PLAYER_EXISTS"
-      );
-    }
+    validateNumberRange(req.body.number, 0, 99, "number");
+    validateNumberRange(
+      req.body.bornYear,
+      1900,
+      new Date().getFullYear(),
+      "bornYear"
+    );
 
     const playerData: IPlayer = {
-      name,
-      number,
-      bornYear,
-      position,
-      height,
-      weight,
-      imageUrl,
+      name: req.body.name,
+      number: req.body.number,
+      bornYear: req.body.bornYear,
+      position: req.body.position,
+      height: req.body.height,
+      weight: req.body.weight,
+      imageUrl: req.body.imageUrl,
     };
 
     const newPlayer = await Player.create(playerData);

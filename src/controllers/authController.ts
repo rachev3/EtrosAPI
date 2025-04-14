@@ -11,6 +11,7 @@ import {
 import { ApiResponse } from "../types/index";
 import { IUser, UserRole, UserDocument } from "../types/models/User";
 import { ENV } from "../config/env";
+import { validateRequiredFields, validateUnique } from "../utils/validator";
 
 dotenv.config();
 
@@ -63,39 +64,15 @@ export const registerUser = asyncHandler(
     req: TypedRequest<RegisterUserRequest>,
     res: TypedResponse<ApiResponse<UserResponseData>>
   ) => {
-    const { username, email, password } = req.body;
-
-    if (!username || !email || !password) {
-      throw new AppError(
-        "Please provide all required fields",
-        400,
-        "MISSING_FIELDS",
-        {
-          missingFields: Object.entries({ username, email, password })
-            .filter(([_, value]) => !value)
-            .map(([key]) => key),
-        }
-      );
-    }
-
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      throw new AppError(
-        "User already exists with this email",
-        409,
-        "USER_EXISTS"
-      );
-    }
-
+    validateRequiredFields(req.body, ["username", "email", "password"]);
+    await validateUnique(User, "email", req.body.email, "email");
     const userData: IUser = {
-      username,
-      email,
-      password,
+      username: req.body.username,
+      email: req.body.email,
+      password: req.body.password,
       role: "user",
     };
-
     const user = await User.create(userData);
-
     res.status(201).json({
       success: true,
       data: formatUserResponse(user),
@@ -108,18 +85,10 @@ export const loginUser = asyncHandler(
     req: TypedRequest<LoginUserRequest>,
     res: TypedResponse<ApiResponse<UserResponseData>>
   ) => {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      throw new AppError(
-        "Please provide email and password",
-        400,
-        "MISSING_CREDENTIALS"
-      );
-    }
-
-    const user = await (User.findOne({ email }) as any).select("+password");
-
+    validateRequiredFields(req.body, ["email", "password"]);
+    const user = await (User.findOne({ email: req.body.email }) as any).select(
+      "+password"
+    );
     if (!user) {
       throw new AppError(
         "Invalid email or password",
@@ -127,8 +96,7 @@ export const loginUser = asyncHandler(
         "INVALID_CREDENTIALS"
       );
     }
-
-    const isMatch = await user.matchPassword(password);
+    const isMatch = await user.matchPassword(req.body.password);
     if (!isMatch) {
       throw new AppError(
         "Invalid email or password",
@@ -136,7 +104,6 @@ export const loginUser = asyncHandler(
         "INVALID_CREDENTIALS"
       );
     }
-
     res.json({
       success: true,
       data: formatUserResponse(user),

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
-import { IUser, UserDocument, UserModel } from "../types/models/User";
+import { UserDocument, UserModel } from "../types/models/User";
 
 const userSchema = new mongoose.Schema<UserDocument, UserModel>(
   {
@@ -39,7 +39,6 @@ const userSchema = new mongoose.Schema<UserDocument, UserModel>(
   }
 );
 
-// Hash password before saving
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
     next();
@@ -50,7 +49,6 @@ userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-// Match entered password with hashed password
 userSchema.methods.matchPassword = async function (enteredPassword: string) {
   return await bcrypt.compare(enteredPassword, this.password);
 };

@@ -46,7 +46,14 @@ export type ErrorCode =
   | "INVALID_USERNAME_LENGTH"
   | "INVALID_PASSWORD_LENGTH"
   | `INVALID_${string}_FORMAT`
-  | `INVALID_${string}_LENGTH`;
+  | `INVALID_${string}_LENGTH`
+  | `DUPLICATE_${string}`
+  | `INVALID_${string}_ENUM`
+  | `INVALID_${string}_RANGE`
+  | `INVALID_${string}_ARRAY_LENGTH`
+  | `INVALID_${string}_DATE`
+  | "INVALID_FILE_TYPE"
+  | "FILE_TOO_LARGE";
 
 export interface JwtPayload {
   id: string;

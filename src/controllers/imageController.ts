@@ -2,6 +2,11 @@ import cloudinary from "../config/cloudinary";
 import { Request, Response } from "express";
 import { AppError } from "../middleware/errorHandler";
 import asyncHandler from "../utils/asyncHandler";
+import {
+  validateFileType,
+  validateFileSize,
+  validateRequiredFields,
+} from "../utils/validator";
 
 interface DeletePhotoRequestBody {
   fileName: string;
@@ -16,6 +21,8 @@ export const uploadPhoto = asyncHandler(
     if (!req.file) {
       throw new AppError("No file uploaded", 400, "NO_FILE_UPLOADED");
     }
+    validateFileType(req.file, ["image/jpeg", "image/png", "image/webp"]);
+    validateFileSize(req.file, 1 * 1024 * 1024); // 1MB
 
     const uploadResult = await new Promise<{
       secure_url: string;
@@ -50,6 +57,7 @@ export const uploadPhoto = asyncHandler(
 );
 
 export const deletePhoto = asyncHandler(async (req: Request, res: Response) => {
+  validateRequiredFields(req.body, ["fileName"]);
   const { fileName } = req.body as DeletePhotoRequestBody;
 
   if (!fileName) {

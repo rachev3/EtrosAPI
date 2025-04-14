@@ -8,6 +8,11 @@ import { AppError } from "../middleware/errorHandler";
 import asyncHandler from "../utils/asyncHandler";
 import { IPlayerStats } from "../types/models/PlayerStats";
 import { ObjectId } from "../types/index";
+import {
+  validateRequiredFields,
+  validateObjectId,
+  validateNumberRange,
+} from "../utils/validator";
 
 interface PlayerStatsRequestBody {
   matchId: string;
@@ -100,6 +105,37 @@ export const getStatsByMatch = asyncHandler(
 
 export const addPlayerStats = asyncHandler(
   async (req: TypedRequest<PlayerStatsRequestBody>, res: Response) => {
+    validateRequiredFields(req.body, ["matchId", "playerId"]);
+    validateObjectId(req.body.matchId, "matchId");
+    validateObjectId(req.body.playerId, "playerId");
+    const statFields = [
+      "fieldGoalsMade",
+      "fieldGoalsAttempted",
+      "twoPointsMade",
+      "twoPointsAttempted",
+      "threePointsMade",
+      "threePointsAttempted",
+      "freeThrowsMade",
+      "freeThrowsAttempted",
+      "offensiveRebounds",
+      "defensiveRebounds",
+      "totalRebounds",
+      "assists",
+      "steals",
+      "blocks",
+      "turnovers",
+      "fouls",
+      "plusMinus",
+      "efficiency",
+      "points",
+    ];
+    const bodyAny = req.body as Record<string, any>;
+    statFields.forEach((field) => {
+      if (bodyAny[field] !== undefined && bodyAny[field] !== null) {
+        validateNumberRange(bodyAny[field], 0, 1000, field);
+      }
+    });
+
     const {
       matchId,
       playerId,

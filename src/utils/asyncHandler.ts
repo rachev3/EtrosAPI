@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import { ParamsDictionary, Query } from "express-serve-static-core";
 import { TypedRequest, ControllerFunction } from "../types/express/index.js";
 

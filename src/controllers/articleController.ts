@@ -4,6 +4,11 @@ import { ControllerHandler, IdParam } from "../types/express/index";
 import { AppError } from "../middleware/errorHandler";
 import asyncHandler from "../utils/asyncHandler";
 import { IArticle } from "../types/models/Article";
+import {
+  validateRequiredFields,
+  validateUnique,
+  validateArray,
+} from "../utils/validator";
 
 interface ArticleRequestBody {
   title: string;
@@ -49,6 +54,15 @@ export const getArticle: ControllerHandler<any, IdParam> = asyncHandler(
 
 export const createArticle: ControllerHandler<ArticleRequestBody> =
   asyncHandler(async (req, res) => {
+    validateRequiredFields(req.body, ["title", "content"]);
+    await validateUnique(Article, "title", req.body.title, "title");
+    if (req.body.metaKeywords) {
+      validateArray(req.body.metaKeywords, 0, 50, "metaKeywords");
+    }
+    if (req.body.images) {
+      validateArray(req.body.images, 0, 20, "images");
+    }
+
     const {
       title,
       content,
@@ -90,21 +104,14 @@ export const updateArticle: ControllerHandler<
   Partial<ArticleRequestBody>,
   IdParam
 > = asyncHandler(async (req, res) => {
-  const { title } = req.body;
-
-  if (title) {
-    const existingArticle = await Article.findOne({
-      title,
-      _id: { $ne: req.params.id },
-    });
-
-    if (existingArticle) {
-      throw new AppError(
-        "Article with this title already exists",
-        400,
-        "ARTICLE_EXISTS"
-      );
-    }
+  if (req.body.title) {
+    await validateUnique(Article, "title", req.body.title, "title");
+  }
+  if (req.body.metaKeywords) {
+    validateArray(req.body.metaKeywords, 0, 50, "metaKeywords");
+  }
+  if (req.body.images) {
+    validateArray(req.body.images, 0, 20, "images");
   }
 
   const updatedArticle = await Article.findByIdAndUpdate(

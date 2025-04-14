@@ -9,8 +9,14 @@ import {
   MatchDocument,
   MatchResult,
   TeamStats,
-} from "../types/models/Match.js";
-import { ObjectId } from "../types/index.js";
+} from "../types/models/Match";
+import { ObjectId } from "../types/index";
+import {
+  validateRequiredFields,
+  validateEnum,
+  validateDate,
+  validateNumberRange,
+} from "../utils/validator";
 
 interface MatchRequestBody {
   opponent: string;
@@ -106,6 +112,26 @@ export const getMatch = asyncHandler(
 
 export const createMatch = asyncHandler(
   async (req: TypedRequest<MatchRequestBody>, res: Response) => {
+    validateRequiredFields(req.body, ["opponent", "date", "location"]);
+    if (typeof req.body.date === "string") {
+      validateDate(req.body.date, "date");
+    }
+    if (req.body.status) {
+      validateEnum(req.body.status, ["upcoming", "finished"], "status");
+    }
+    if (req.body.result) {
+      validateEnum(req.body.result, ["Win", "Loss", "Pending"], "result");
+    }
+    if (req.body.ourScore !== undefined && req.body.ourScore !== null) {
+      validateNumberRange(req.body.ourScore, 0, 1000, "ourScore");
+    }
+    if (
+      req.body.opponentScore !== undefined &&
+      req.body.opponentScore !== null
+    ) {
+      validateNumberRange(req.body.opponentScore, 0, 1000, "opponentScore");
+    }
+
     const {
       opponent,
       date,

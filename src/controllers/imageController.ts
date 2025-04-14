@@ -7,6 +7,10 @@ import {
   validateFileSize,
   validateRequiredFields,
 } from "../utils/validator";
+import {
+  uploadPhoto as imageServiceUpload,
+  deletePhoto as imageServiceDelete,
+} from "../services/imageService";
 
 interface DeletePhotoRequestBody {
   fileName: string;
@@ -23,28 +27,7 @@ export const uploadPhoto = asyncHandler(
     }
     validateFileType(req.file, ["image/jpeg", "image/png", "image/webp"]);
     validateFileSize(req.file, 1 * 1024 * 1024); // 1MB
-
-    const uploadResult = await new Promise<{
-      secure_url: string;
-      public_id: string;
-    }>((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        { folder: "articles" },
-        (error, result) => {
-          if (error) {
-            console.error("Cloudinary Upload Error:", error);
-            reject(error);
-            return;
-          }
-          resolve(result as any);
-        }
-      );
-
-      uploadStream.end(req.file!.buffer);
-    }).catch((error) => {
-      throw new AppError("Upload failed", 500, "UPLOAD_FAILED", { error });
-    });
-
+    const uploadResult = await imageServiceUpload(req.file!);
     res.status(201).json({
       success: true,
       data: {
@@ -64,7 +47,7 @@ export const deletePhoto = asyncHandler(async (req: Request, res: Response) => {
     throw new AppError("File name is required", 400, "FILE_NAME_REQUIRED");
   }
 
-  await cloudinary.uploader.destroy(fileName);
+  await imageServiceDelete(fileName);
 
   res.status(200).json({
     success: true,

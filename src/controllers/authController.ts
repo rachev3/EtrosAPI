@@ -11,7 +11,13 @@ import {
 import { ApiResponse } from "../types/index";
 import { IUser, UserRole, UserDocument } from "../types/models/User";
 import { ENV } from "../config/env";
-import { validateRequiredFields, validateUnique } from "../utils/validator";
+import { validateRequiredFields } from "../utils/validator";
+import {
+  registerUser as userServiceRegister,
+  loginUser as userServiceLogin,
+  generateToken as userServiceGenerateToken,
+  getUserProfile as userServiceGetProfile,
+} from "../services/userService";
 
 dotenv.config();
 
@@ -65,17 +71,22 @@ export const registerUser = asyncHandler(
     res: TypedResponse<ApiResponse<UserResponseData>>
   ) => {
     validateRequiredFields(req.body, ["username", "email", "password"]);
-    await validateUnique(User, "email", req.body.email, "email");
     const userData: IUser = {
       username: req.body.username,
       email: req.body.email,
       password: req.body.password,
       role: "user",
     };
-    const user = await User.create(userData);
+    const user = await userServiceRegister(userData);
     res.status(201).json({
       success: true,
-      data: formatUserResponse(user),
+      data: {
+        _id: user._id.toString(),
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        token: userServiceGenerateToken(user._id.toString()),
+      },
     });
   }
 );
@@ -86,27 +97,16 @@ export const loginUser = asyncHandler(
     res: TypedResponse<ApiResponse<UserResponseData>>
   ) => {
     validateRequiredFields(req.body, ["email", "password"]);
-    const user = await (User.findOne({ email: req.body.email }) as any).select(
-      "+password"
-    );
-    if (!user) {
-      throw new AppError(
-        "Invalid email or password",
-        401,
-        "INVALID_CREDENTIALS"
-      );
-    }
-    const isMatch = await user.matchPassword(req.body.password);
-    if (!isMatch) {
-      throw new AppError(
-        "Invalid email or password",
-        401,
-        "INVALID_CREDENTIALS"
-      );
-    }
+    const user = await userServiceLogin(req.body.email, req.body.password);
     res.json({
       success: true,
-      data: formatUserResponse(user),
+      data: {
+        _id: user._id.toString(),
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        token: userServiceGenerateToken(user._id.toString()),
+      },
     });
   }
 );
@@ -123,13 +123,7 @@ export const getUserProfile = asyncHandler(
         "AUTHENTICATION_REQUIRED"
       );
     }
-
-    const user = await User.findById(req.user._id.toString());
-
-    if (!user) {
-      throw new AppError("User not found", 404, "USER_NOT_FOUND");
-    }
-
+    const user = await userServiceGetProfile(req.user._id.toString());
     const userResponse: UserProfileResponse = {
       _id: user._id.toString(),
       username: user.username,
@@ -138,7 +132,6 @@ export const getUserProfile = asyncHandler(
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
-
     res.json({
       success: true,
       data: userResponse,

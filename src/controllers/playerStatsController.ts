@@ -13,6 +13,13 @@ import {
   validateObjectId,
   validateNumberRange,
 } from "../utils/validator";
+import {
+  addPlayerStats as playerStatsServiceAdd,
+  updatePlayerStats as playerStatsServiceUpdate,
+  deletePlayerStats as playerStatsServiceDelete,
+  getStatsByPlayer as playerStatsServiceGetByPlayer,
+  getStatsByMatch as playerStatsServiceGetByMatch,
+} from "../services/playerStatsService";
 
 interface PlayerStatsRequestBody {
   matchId: string;
@@ -61,19 +68,7 @@ export const getAllPlayerStats = asyncHandler(
 
 export const getStatsByPlayer = asyncHandler(
   async (req: Request<{ playerId: string }>, res: Response) => {
-    const { playerId } = req.params;
-    const stats = await PlayerStats.find({ player: playerId }).populate(
-      "match"
-    );
-
-    if (!stats.length) {
-      throw new AppError(
-        "No stats found for this player",
-        404,
-        "PLAYER_STATS_NOT_FOUND"
-      );
-    }
-
+    const stats = await playerStatsServiceGetByPlayer(req.params.playerId);
     res.status(200).json({
       success: true,
       count: stats.length,
@@ -84,17 +79,7 @@ export const getStatsByPlayer = asyncHandler(
 
 export const getStatsByMatch = asyncHandler(
   async (req: Request<{ matchId: string }>, res: Response) => {
-    const { matchId } = req.params;
-    const stats = await PlayerStats.find({ match: matchId }).populate("player");
-
-    if (!stats.length) {
-      throw new AppError(
-        "No stats found for this match",
-        404,
-        "PLAYER_STATS_NOT_FOUND"
-      );
-    }
-
+    const stats = await playerStatsServiceGetByMatch(req.params.matchId);
     res.status(200).json({
       success: true,
       count: stats.length,
@@ -135,80 +120,30 @@ export const addPlayerStats = asyncHandler(
         validateNumberRange(bodyAny[field], 0, 1000, field);
       }
     });
-
-    const {
-      matchId,
-      playerId,
-      fieldGoalsMade,
-      fieldGoalsAttempted,
-      twoPointsMade,
-      twoPointsAttempted,
-      threePointsMade,
-      threePointsAttempted,
-      freeThrowsMade,
-      freeThrowsAttempted,
-      offensiveRebounds,
-      defensiveRebounds,
-      totalRebounds,
-      assists,
-      steals,
-      blocks,
-      turnovers,
-      fouls,
-      plusMinus,
-      efficiency,
-      points,
-    } = req.body;
-
-    const match = await Match.findById(matchId);
-    if (!match) {
-      throw new AppError("Match not found", 404, "MATCH_NOT_FOUND");
-    }
-
-    const player = await Player.findById(playerId);
-    if (!player) {
-      throw new AppError("Player not found", 404, "PLAYER_NOT_FOUND");
-    }
-
     const newStatsData: IPlayerStats = {
-      match: matchId,
-      player: playerId,
-      fieldGoalsMade: fieldGoalsMade || 0,
-      fieldGoalsAttempted: fieldGoalsAttempted || 0,
-      twoPointsMade: twoPointsMade || 0,
-      twoPointsAttempted: twoPointsAttempted || 0,
-      threePointsMade: threePointsMade || 0,
-      threePointsAttempted: threePointsAttempted || 0,
-      freeThrowsMade: freeThrowsMade || 0,
-      freeThrowsAttempted: freeThrowsAttempted || 0,
-      offensiveRebounds: offensiveRebounds || 0,
-      defensiveRebounds: defensiveRebounds || 0,
-      totalRebounds: totalRebounds || 0,
-      assists: assists || 0,
-      steals: steals || 0,
-      blocks: blocks || 0,
-      turnovers: turnovers || 0,
-      fouls: fouls || 0,
-      plusMinus: plusMinus || 0,
-      efficiency: efficiency || 0,
-      points: points || 0,
+      match: req.body.matchId,
+      player: req.body.playerId,
+      fieldGoalsMade: req.body.fieldGoalsMade || 0,
+      fieldGoalsAttempted: req.body.fieldGoalsAttempted || 0,
+      twoPointsMade: req.body.twoPointsMade || 0,
+      twoPointsAttempted: req.body.twoPointsAttempted || 0,
+      threePointsMade: req.body.threePointsMade || 0,
+      threePointsAttempted: req.body.threePointsAttempted || 0,
+      freeThrowsMade: req.body.freeThrowsMade || 0,
+      freeThrowsAttempted: req.body.freeThrowsAttempted || 0,
+      offensiveRebounds: req.body.offensiveRebounds || 0,
+      defensiveRebounds: req.body.defensiveRebounds || 0,
+      totalRebounds: req.body.totalRebounds || 0,
+      assists: req.body.assists || 0,
+      steals: req.body.steals || 0,
+      blocks: req.body.blocks || 0,
+      turnovers: req.body.turnovers || 0,
+      fouls: req.body.fouls || 0,
+      plusMinus: req.body.plusMinus || 0,
+      efficiency: req.body.efficiency || 0,
+      points: req.body.points || 0,
     };
-
-    const newStats = await PlayerStats.create(newStatsData);
-
-    player.statsHistory = [
-      ...(player.statsHistory || []),
-      newStats._id,
-    ] as ObjectId[];
-    await player.save();
-
-    if (match.playerStats) {
-      match.playerStats = [...match.playerStats, newStats._id] as ObjectId[];
-    } else {
-      match.playerStats = [newStats._id] as ObjectId[];
-    }
-    await match.save();
-
+    const newStats = await playerStatsServiceAdd(newStatsData);
     res.status(201).json({
       success: true,
       data: newStats,
@@ -218,19 +153,10 @@ export const addPlayerStats = asyncHandler(
 
 export const updatePlayerStats = asyncHandler(
   async (req: Request<{ id: string }>, res: Response) => {
-    const { id } = req.params;
-    const updatedStats = await PlayerStats.findByIdAndUpdate(id, req.body, {
-      new: true,
-    });
-
-    if (!updatedStats) {
-      throw new AppError(
-        "Player stats not found",
-        404,
-        "PLAYER_STATS_NOT_FOUND"
-      );
-    }
-
+    const updatedStats = await playerStatsServiceUpdate(
+      req.params.id,
+      req.body
+    );
     res.status(200).json({
       success: true,
       data: updatedStats,
@@ -240,17 +166,7 @@ export const updatePlayerStats = asyncHandler(
 
 export const deletePlayerStats = asyncHandler(
   async (req: Request<{ id: string }>, res: Response) => {
-    const { id } = req.params;
-    const deletedStats = await PlayerStats.findByIdAndDelete(id);
-
-    if (!deletedStats) {
-      throw new AppError(
-        "Player stats not found",
-        404,
-        "PLAYER_STATS_NOT_FOUND"
-      );
-    }
-
+    await playerStatsServiceDelete(req.params.id);
     res.status(200).json({
       success: true,
       data: {

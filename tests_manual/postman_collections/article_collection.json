@@ -1,0 +1,238 @@
+{
+  "info": {
+    "name": "Article API (with Auth)",
+    "description": "Test all Article endpoints and edge cases with authentication",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "token", "value": "" },
+    { "key": "articleId", "value": "REPLACE_WITH_REAL_ID" }
+  ],
+  "item": [
+    {
+      "name": "Login as Admin",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"TestPassword123\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/auth/login",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "auth", "login"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "  var json = pm.response.json();",
+              "  pm.collectionVariables.set(\"token\", json.data.token);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create Article - Valid",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Unique Article Title\",\n  \"content\": \"This is the content.\",\n  \"author\": \"Author Name\",\n  \"metaTitle\": \"Meta Title\",\n  \"metaDescription\": \"Meta Description\",\n  \"metaKeywords\": [\"news\", \"update\"],\n  \"images\": [\"img1.jpg\", \"img2.jpg\"]\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/articles",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "articles"]
+        }
+      }
+    },
+    {
+      "name": "Create Article - Duplicate Title",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Unique Article Title\",\n  \"content\": \"Another content.\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/articles",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "articles"]
+        }
+      }
+    },
+    {
+      "name": "Create Article - Missing Required Fields",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"content\": \"No title here.\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/articles",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "articles"]
+        }
+      }
+    },
+    {
+      "name": "Get All Articles",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:3000/api/articles",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "articles"]
+        }
+      }
+    },
+    {
+      "name": "Get Article by ID - Valid",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:3000/api/articles/{{articleId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "articles", "{{articleId}}"]
+        }
+      }
+    },
+    {
+      "name": "Get Article by ID - Not Found",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:3000/api/articles/000000000000000000000000",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "articles", "000000000000000000000000"]
+        }
+      }
+    },
+    {
+      "name": "Update Article - Valid",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Updated Article Title\",\n  \"content\": \"Updated content.\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/articles/{{articleId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "articles", "{{articleId}}"]
+        }
+      }
+    },
+    {
+      "name": "Update Article - Duplicate Title",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Unique Article Title\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/articles/{{articleId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "articles", "{{articleId}}"]
+        }
+      }
+    },
+    {
+      "name": "Update Article - Not Found",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Doesn't matter\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/articles/000000000000000000000000",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "articles", "000000000000000000000000"]
+        }
+      }
+    },
+    {
+      "name": "Delete Article - Valid",
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": {
+          "raw": "http://localhost:3000/api/articles/{{articleId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "articles", "{{articleId}}"]
+        }
+      }
+    },
+    {
+      "name": "Delete Article - Not Found",
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": {
+          "raw": "http://localhost:3000/api/articles/000000000000000000000000",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "articles", "000000000000000000000000"]
+        }
+      }
+    }
+  ]
+}

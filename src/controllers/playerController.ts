@@ -16,6 +16,12 @@ import {
   validateArray,
   validateNumberRange,
 } from "../utils/validator";
+import {
+  createPlayer as playerServiceCreate,
+  updatePlayer as playerServiceUpdate,
+  deletePlayer as playerServiceDelete,
+  getPlayer as playerServiceGet,
+} from "../services/playerService";
 
 interface PlayerRequestBody {
   name: string;
@@ -68,31 +74,7 @@ export const getPlayers = asyncHandler(async (req: Request, res: Response) => {
 
 export const getPlayer = asyncHandler(
   async (req: Request<{ id: string }>, res: Response) => {
-    let query = Player.findById(req.params.id);
-
-    if (req.query.populate) {
-      const populateFields = (req.query.populate as string).split(",");
-
-      populateFields.forEach((field) => {
-        if (field.includes(":")) {
-          const [fieldName, selection] = field.split(":");
-          const select = selection.replace(/;/g, " ");
-          query = query.populate({
-            path: fieldName,
-            select,
-          });
-        } else {
-          query = query.populate(field);
-        }
-      });
-    }
-
-    const player = await query;
-
-    if (!player) {
-      throw new AppError("Player not found", 404, "PLAYER_NOT_FOUND");
-    }
-
+    const player = await playerServiceGet(req.params.id);
     res.status(200).json({
       success: true,
       data: player,
@@ -121,13 +103,7 @@ export const createPlayer = asyncHandler(
       });
     }
     validateNumberRange(req.body.number, 0, 99, "number");
-    validateNumberRange(
-      req.body.bornYear,
-      1900,
-      new Date().getFullYear(),
-      "bornYear"
-    );
-
+    validateNumberRange(req.body.bornYear, 1900, 2100, "bornYear");
     const playerData: IPlayer = {
       name: req.body.name,
       number: req.body.number,
@@ -137,9 +113,7 @@ export const createPlayer = asyncHandler(
       weight: req.body.weight,
       imageUrl: req.body.imageUrl,
     };
-
-    const newPlayer = await Player.create(playerData);
-
+    const newPlayer = await playerServiceCreate(playerData);
     res.status(201).json({
       success: true,
       data: newPlayer,
@@ -152,16 +126,7 @@ export const updatePlayer = asyncHandler(
     req: TypedRequest<Partial<PlayerRequestBody>, { id: string }>,
     res: Response
   ) => {
-    const updatedPlayer = await Player.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
-
-    if (!updatedPlayer) {
-      throw new AppError("Player not found", 404, "PLAYER_NOT_FOUND");
-    }
-
+    const updatedPlayer = await playerServiceUpdate(req.params.id, req.body);
     res.status(200).json({
       success: true,
       data: updatedPlayer,
@@ -171,12 +136,7 @@ export const updatePlayer = asyncHandler(
 
 export const deletePlayer = asyncHandler(
   async (req: Request<{ id: string }>, res: Response) => {
-    const player = await Player.findByIdAndDelete(req.params.id);
-
-    if (!player) {
-      throw new AppError("Player not found", 404, "PLAYER_NOT_FOUND");
-    }
-
+    await playerServiceDelete(req.params.id);
     res.status(200).json({
       success: true,
       data: {

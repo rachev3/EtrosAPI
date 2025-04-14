@@ -1,0 +1,163 @@
+{
+  "info": {
+    "name": "User Auth API",
+    "description": "Test all User/Auth endpoints and edge cases",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "token", "value": "" },
+    { "key": "userId", "value": "REPLACE_WITH_REAL_ID" }
+  ],
+  "item": [
+    {
+      "name": "Register User - Valid",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"newuser1\",\n  \"email\": \"newuser1@example.com\",\n  \"password\": \"TestPassword123\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/auth/register",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "auth", "register"]
+        }
+      }
+    },
+    {
+      "name": "Register User - Duplicate Email",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"newuser2\",\n  \"email\": \"newuser1@example.com\",\n  \"password\": \"TestPassword123\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/auth/register",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "auth", "register"]
+        }
+      }
+    },
+    {
+      "name": "Register User - Missing Fields",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"missinguser@example.com\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/auth/register",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "auth", "register"]
+        }
+      }
+    },
+    {
+      "name": "Login User - Valid (Admin)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"TestPassword123\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/auth/login",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "auth", "login"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "  var json = pm.response.json();",
+              "  pm.collectionVariables.set(\"token\", json.data.token);",
+              "  pm.collectionVariables.set(\"userId\", json.data._id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login User - Invalid Password",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"WrongPassword\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/auth/login",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "auth", "login"]
+        }
+      }
+    },
+    {
+      "name": "Login User - Missing Fields",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@example.com\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/auth/login",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "auth", "login"]
+        }
+      }
+    },
+    {
+      "name": "Get User Profile - Valid (Admin)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": {
+          "raw": "http://localhost:3000/api/auth/user",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "auth", "user"]
+        }
+      }
+    },
+    {
+      "name": "Get User Profile - No Token",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:3000/api/auth/user",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "auth", "user"]
+        }
+      }
+    }
+  ]
+}

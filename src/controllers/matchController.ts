@@ -17,6 +17,12 @@ import {
   validateDate,
   validateNumberRange,
 } from "../utils/validator";
+import {
+  createMatch as matchServiceCreate,
+  updateMatch as matchServiceUpdate,
+  deleteMatch as matchServiceDelete,
+  getMatch as matchServiceGet,
+} from "../services/matchService";
 
 interface MatchRequestBody {
   opponent: string;
@@ -49,60 +55,7 @@ export const getMatches = asyncHandler(async (req: Request, res: Response) => {
 
 export const getMatch = asyncHandler(
   async (req: Request<{ id: string }>, res: Response) => {
-    const { id } = req.params;
-
-    let query = Match.findById(id);
-
-    if (req.query.populate) {
-      const populateFields = (req.query.populate as string).split(",");
-
-      const populateOptions: Record<string, any> = {};
-
-      populateFields.forEach((field) => {
-        if (field.includes(":")) {
-          const [fieldName, selection] = field.split(":");
-          const select = selection.replace(/;/g, " ");
-          query = query.populate({
-            path: fieldName,
-            select,
-          });
-        } else if (field.includes(".")) {
-          const parts = field.split(".");
-          let currentPath = parts[0];
-
-          if (!populateOptions[currentPath]) {
-            populateOptions[currentPath] = {
-              path: currentPath,
-              populate: {},
-            };
-          }
-
-          if (parts.length === 2) {
-            populateOptions[currentPath].populate = { path: parts[1] };
-          } else if (parts.length > 2) {
-            query = query.populate({
-              path: parts[0],
-              populate: {
-                path: parts[1],
-              },
-            });
-          }
-        } else {
-          query = query.populate(field);
-        }
-      });
-
-      Object.values(populateOptions).forEach((option) => {
-        query = query.populate(option);
-      });
-    }
-
-    const match = await query;
-
-    if (!match) {
-      throw new AppError("Match not found", 404, "MATCH_NOT_FOUND");
-    }
-
+    const match = await matchServiceGet(req.params.id);
     res.status(200).json({
       success: true,
       data: match,
@@ -131,104 +84,57 @@ export const createMatch = asyncHandler(
     ) {
       validateNumberRange(req.body.opponentScore, 0, 1000, "opponentScore");
     }
-
-    const {
-      opponent,
-      date,
-      location,
-      ourScore,
-      opponentScore,
-      teamStats,
-      playerStats,
-    } = req.body;
-
-    let result: MatchResult = "Pending";
-    if (
-      ourScore !== null &&
-      opponentScore !== null &&
-      ourScore !== undefined &&
-      opponentScore !== undefined
+    let matchData = { ...req.body };
+    let date: Date | undefined = undefined;
+    if (typeof matchData.date === "string") {
+      const parsedDate = new Date(matchData.date);
+      if (parsedDate instanceof Date && !isNaN(parsedDate.getTime())) {
+        date = parsedDate;
+      }
+    } else if (
+      matchData.date instanceof Date &&
+      !isNaN(matchData.date.getTime())
     ) {
-      result =
-        ourScore > opponentScore
-          ? "Win"
-          : ourScore < opponentScore
-          ? "Loss"
-          : "Pending";
+      date = matchData.date;
     }
-
-    const defaultTeamStats: TeamStats = {
-      fieldGoalsMade: 0,
-      fieldGoalsAttempted: 0,
-      twoPointsMade: 0,
-      twoPointsAttempted: 0,
-      threePointsMade: 0,
-      threePointsAttempted: 0,
-      freeThrowsMade: 0,
-      freeThrowsAttempted: 0,
-      offensiveRebounds: 0,
-      defensiveRebounds: 0,
-      totalRebounds: 0,
-      assists: 0,
-      steals: 0,
-      blocks: 0,
-      turnovers: 0,
-      fouls: 0,
-      points: 0,
+    let teamStats;
+    if (matchData.teamStats) {
+      teamStats = {
+        fieldGoalsMade: matchData.teamStats.fieldGoalsMade ?? 0,
+        fieldGoalsAttempted: matchData.teamStats.fieldGoalsAttempted ?? 0,
+        twoPointsMade: matchData.teamStats.twoPointsMade ?? 0,
+        twoPointsAttempted: matchData.teamStats.twoPointsAttempted ?? 0,
+        threePointsMade: matchData.teamStats.threePointsMade ?? 0,
+        threePointsAttempted: matchData.teamStats.threePointsAttempted ?? 0,
+        freeThrowsMade: matchData.teamStats.freeThrowsMade ?? 0,
+        freeThrowsAttempted: matchData.teamStats.freeThrowsAttempted ?? 0,
+        offensiveRebounds: matchData.teamStats.offensiveRebounds ?? 0,
+        defensiveRebounds: matchData.teamStats.defensiveRebounds ?? 0,
+        totalRebounds: matchData.teamStats.totalRebounds ?? 0,
+        assists: matchData.teamStats.assists ?? 0,
+        steals: matchData.teamStats.steals ?? 0,
+        blocks: matchData.teamStats.blocks ?? 0,
+        turnovers: matchData.teamStats.turnovers ?? 0,
+        fouls: matchData.teamStats.fouls ?? 0,
+        points: matchData.teamStats.points ?? 0,
+      };
+    }
+    const matchCreateData: Partial<IMatch> = {
+      ...matchData,
+      date,
+      teamStats,
     };
-
-    const finalTeamStats: TeamStats = {
-      ...defaultTeamStats,
-      ...(teamStats || {}),
-    };
-
-    const matchData: IMatch = {
-      opponent,
-      date: new Date(date),
-      location,
-      status: "upcoming",
-      result,
-      ourScore: ourScore !== undefined ? ourScore : null,
-      opponentScore: opponentScore !== undefined ? opponentScore : null,
-      teamStats: finalTeamStats,
-      playerStats: playerStats || [],
-    };
-
-    const newMatch = await Match.create(matchData);
-
+    const createdMatch = await matchServiceCreate(matchCreateData);
     res.status(201).json({
       success: true,
-      data: newMatch,
+      data: createdMatch,
     });
   }
 );
 
 export const updateMatch = asyncHandler(
   async (req: Request<{ id: string }>, res: Response) => {
-    const { id } = req.params;
-    const updateData = req.body;
-
-    if (updateData.result && updateData.result !== "Pending") {
-      if (
-        updateData.ourScore === undefined ||
-        updateData.opponentScore === undefined
-      ) {
-        throw new AppError(
-          "Score values are required when setting a match result",
-          400,
-          "MISSING_SCORES"
-        );
-      }
-    }
-
-    const updatedMatch = await Match.findByIdAndUpdate(id, updateData, {
-      new: true,
-    });
-
-    if (!updatedMatch) {
-      throw new AppError("Match not found", 404, "MATCH_NOT_FOUND");
-    }
-
+    const updatedMatch = await matchServiceUpdate(req.params.id, req.body);
     res.status(200).json({
       success: true,
       data: updatedMatch,
@@ -236,82 +142,9 @@ export const updateMatch = asyncHandler(
   }
 );
 
-const updateStatsAfterMatch = async (
-  match: MatchDocument
-): Promise<boolean> => {
-  try {
-    const populatedMatch = await Match.findById(match._id).populate(
-      "playerStats"
-    );
-
-    if (
-      !populatedMatch ||
-      !populatedMatch.playerStats ||
-      populatedMatch.playerStats.length === 0
-    ) {
-      console.log("No player stats found for this match");
-      return false;
-    }
-
-    const teamStats: TeamStats = {
-      fieldGoalsMade: 0,
-      fieldGoalsAttempted: 0,
-      twoPointsMade: 0,
-      twoPointsAttempted: 0,
-      threePointsMade: 0,
-      threePointsAttempted: 0,
-      freeThrowsMade: 0,
-      freeThrowsAttempted: 0,
-      offensiveRebounds: 0,
-      defensiveRebounds: 0,
-      totalRebounds: 0,
-      assists: 0,
-      steals: 0,
-      blocks: 0,
-      turnovers: 0,
-      fouls: 0,
-      points: 0,
-    };
-
-    populatedMatch.playerStats.forEach((playerStat: any) => {
-      teamStats.fieldGoalsMade += playerStat.fieldGoalsMade || 0;
-      teamStats.fieldGoalsAttempted += playerStat.fieldGoalsAttempted || 0;
-      teamStats.twoPointsMade += playerStat.twoPointsMade || 0;
-      teamStats.twoPointsAttempted += playerStat.twoPointsAttempted || 0;
-      teamStats.threePointsMade += playerStat.threePointsMade || 0;
-      teamStats.threePointsAttempted += playerStat.threePointsAttempted || 0;
-      teamStats.freeThrowsMade += playerStat.freeThrowsMade || 0;
-      teamStats.freeThrowsAttempted += playerStat.freeThrowsAttempted || 0;
-      teamStats.offensiveRebounds += playerStat.offensiveRebounds || 0;
-      teamStats.defensiveRebounds += playerStat.defensiveRebounds || 0;
-      teamStats.totalRebounds += playerStat.totalRebounds || 0;
-      teamStats.assists += playerStat.assists || 0;
-      teamStats.steals += playerStat.steals || 0;
-      teamStats.blocks += playerStat.blocks || 0;
-      teamStats.turnovers += playerStat.turnovers || 0;
-      teamStats.fouls += playerStat.fouls || 0;
-      teamStats.points += playerStat.points || 0;
-    });
-
-    await Match.findByIdAndUpdate(match._id, { teamStats });
-
-    console.log("Match stats updated successfully");
-    return true;
-  } catch (error) {
-    console.error("Error updating stats after match:", error);
-    return false;
-  }
-};
-
 export const deleteMatch = asyncHandler(
   async (req: Request<{ id: string }>, res: Response) => {
-    const { id } = req.params;
-    const match = await Match.findByIdAndDelete(id);
-
-    if (!match) {
-      throw new AppError("Match not found", 404, "MATCH_NOT_FOUND");
-    }
-
+    await matchServiceDelete(req.params.id);
     res.status(200).json({
       success: true,
       data: {

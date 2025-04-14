@@ -3,10 +3,6 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-/**
- * Connects to MongoDB using the connection string from environment variables
- * @returns {Promise<void>}
- */
 const connectDB = async (): Promise<void> => {
   try {
     await mongoose.connect(process.env.MONGO_URI as string);

@@ -3,31 +3,28 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import asyncHandler from "../utils/asyncHandler.js";
 import { AppError } from "../middleware/errorHandler.js";
-import { Request, Response } from "express";
+import { Response } from "express";
 import {
   AuthRequest,
   TypedRequest,
   TypedResponse,
 } from "../types/express/index.js";
-import { ApiResponse, JwtPayload } from "../types/index.js";
-import { IUser, UserDocument, UserRole } from "../types/models/User.js";
+import { ApiResponse } from "../types/index.js";
+import { IUser, UserRole } from "../types/models/User.js";
 
 dotenv.config();
 
-// Type for user registration request body
 interface RegisterUserRequest {
   username: string;
   email: string;
   password: string;
 }
 
-// Type for user login request body
 interface LoginUserRequest {
   email: string;
   password: string;
 }
 
-// Type for user response data
 interface UserResponseData {
   _id: string;
   username: string;
@@ -36,7 +33,6 @@ interface UserResponseData {
   token: string;
 }
 
-// Type for user profile response data without password
 interface UserProfileResponse {
   _id: string;
   username: string;
@@ -46,14 +42,12 @@ interface UserProfileResponse {
   updatedAt: Date;
 }
 
-// **Generate JWT Token**
 const generateToken = (userId: string): string => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET as string, {
-    expiresIn: "7d", // Token valid for 7 days
+    expiresIn: "1d",
   });
 };
 
-// **User Registration**
 export const registerUser = asyncHandler(
   async (
     req: TypedRequest<RegisterUserRequest>,
@@ -61,7 +55,6 @@ export const registerUser = asyncHandler(
   ) => {
     const { username, email, password } = req.body;
 
-    // Check if all required fields are provided
     if (!username || !email || !password) {
       throw new AppError(
         "Please provide all required fields",
@@ -75,7 +68,6 @@ export const registerUser = asyncHandler(
       );
     }
 
-    // Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
       throw new AppError(
@@ -85,12 +77,11 @@ export const registerUser = asyncHandler(
       );
     }
 
-    // Create new user with all required fields from IUser
     const userData: IUser = {
       username,
       email,
       password,
-      role: "user", // Default role
+      role: "user",
     };
 
     const user = await User.create(userData);
@@ -108,7 +99,6 @@ export const registerUser = asyncHandler(
   }
 );
 
-// **User Login**
 export const loginUser = asyncHandler(
   async (
     req: TypedRequest<LoginUserRequest>,
@@ -116,7 +106,6 @@ export const loginUser = asyncHandler(
   ) => {
     const { email, password } = req.body;
 
-    // Check if email and password are provided
     if (!email || !password) {
       throw new AppError(
         "Please provide email and password",
@@ -125,7 +114,6 @@ export const loginUser = asyncHandler(
       );
     }
 
-    // Check if user exists
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -136,7 +124,6 @@ export const loginUser = asyncHandler(
       );
     }
 
-    // Check if password matches
     const isMatch = await user.matchPassword(password);
     if (!isMatch) {
       throw new AppError(
@@ -159,7 +146,6 @@ export const loginUser = asyncHandler(
   }
 );
 
-// **Get User Profile (Protected Route)**
 export const getUserProfile = asyncHandler(
   async (
     req: AuthRequest,

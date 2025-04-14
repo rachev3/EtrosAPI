@@ -3,29 +3,24 @@ import { Request, Response } from "express";
 import { AppError } from "../middleware/errorHandler.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
-// Interface for file deletion request
 interface DeletePhotoRequestBody {
   fileName: string;
 }
 
-// Interface for Express Request with file
 interface FileRequest extends Request {
   file?: Express.Multer.File;
 }
 
-// ✅ Upload Image to Cloudinary
 export const uploadPhoto = asyncHandler(
   async (req: FileRequest, res: Response) => {
     if (!req.file) {
       throw new AppError("No file uploaded", 400, "NO_FILE_UPLOADED");
     }
 
-    // Use a Promise to handle the upload_stream callback
     const uploadResult = await new Promise<{
       secure_url: string;
       public_id: string;
     }>((resolve, reject) => {
-      // Upload to Cloudinary
       const uploadStream = cloudinary.uploader.upload_stream(
         { folder: "articles" },
         (error, result) => {
@@ -54,7 +49,6 @@ export const uploadPhoto = asyncHandler(
   }
 );
 
-// ✅ Delete Image from Cloudinary
 export const deletePhoto = asyncHandler(async (req: Request, res: Response) => {
   const { fileName } = req.body as DeletePhotoRequestBody;
 

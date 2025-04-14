@@ -10,14 +10,12 @@ const playerStatsSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Match",
       required: true,
-    }, // Match reference
+    },
     player: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Player",
       required: true,
-    }, // Player reference
-
-    // ✅ Individual player performance in this match
+    },
     fieldGoalsMade: { type: Number, default: 0 },
     fieldGoalsAttempted: { type: Number, default: 0 },
     twoPointsMade: { type: Number, default: 0 },

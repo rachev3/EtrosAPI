@@ -18,7 +18,7 @@ const playerSchema = new mongoose.Schema(
       required: true,
     },
     bornYear: {
-      type: Number, // Example: 1990
+      type: Number,
       required: true,
     },
     position: {
@@ -30,14 +30,14 @@ const playerSchema = new mongoose.Schema(
         "PowerForward",
         "SmallForward",
         "Center",
-      ] as PlayerPosition[], // Example: ["PointGuard", "ShootingGuard"]
+      ] as PlayerPosition[],
     },
     height: {
-      type: String, // Example: "6'5" (6 feet 5 inches)
+      type: String,
       required: false,
     },
     weight: {
-      type: Number, // Example: 220 (220 lbs)
+      type: Number,
       required: false,
     },
     imageUrl: {
@@ -48,7 +48,7 @@ const playerSchema = new mongoose.Schema(
       { type: mongoose.Schema.Types.ObjectId, ref: "PlayerStats" },
     ],
   },
-  { timestamps: true } // Automatically adds createdAt & updatedAt
+  { timestamps: true }
 );
 
 const Player = mongoose.model<PlayerDocument, PlayerModel>(

@@ -6,13 +6,9 @@ import { Request, Response } from "express";
 import { TypedRequest } from "../types/express/index.js";
 import { AppError } from "../middleware/errorHandler.js";
 import asyncHandler from "../utils/asyncHandler.js";
-import {
-  IPlayerStats,
-  PlayerStatsDocument,
-} from "../types/models/PlayerStats.js";
+import { IPlayerStats } from "../types/models/PlayerStats.js";
 import { ObjectId } from "../types/index.js";
 
-// Interface for player stats creation/update request body
 interface PlayerStatsRequestBody {
   matchId: string;
   playerId: string;
@@ -37,18 +33,14 @@ interface PlayerStatsRequestBody {
   points?: number;
 }
 
-// **1️⃣ Get All Player Stats**
 export const getAllPlayerStats = asyncHandler(
   async (req: Request, res: Response) => {
-    // Create a new APIFeatures instance with filtering and sorting
     const features = new APIFeatures(PlayerStats.find(), req.query)
       .filter()
       .sort();
 
-    // Apply pagination
     await features.paginate();
 
-    // Apply population if requested
     features.populate();
 
     const stats = await features.query;
@@ -62,7 +54,6 @@ export const getAllPlayerStats = asyncHandler(
   }
 );
 
-// **2️⃣ Get Stats By Player**
 export const getStatsByPlayer = asyncHandler(
   async (req: Request<{ playerId: string }>, res: Response) => {
     const { playerId } = req.params;
@@ -86,7 +77,6 @@ export const getStatsByPlayer = asyncHandler(
   }
 );
 
-// **3️⃣ Get Stats By Match**
 export const getStatsByMatch = asyncHandler(
   async (req: Request<{ matchId: string }>, res: Response) => {
     const { matchId } = req.params;
@@ -108,7 +98,6 @@ export const getStatsByMatch = asyncHandler(
   }
 );
 
-// **4️⃣ Add Player Stats**
 export const addPlayerStats = asyncHandler(
   async (req: TypedRequest<PlayerStatsRequestBody>, res: Response) => {
     const {
@@ -148,7 +137,6 @@ export const addPlayerStats = asyncHandler(
     const newStatsData: IPlayerStats = {
       match: matchId,
       player: playerId,
-      // Shooting stats
       fieldGoalsMade: fieldGoalsMade || 0,
       fieldGoalsAttempted: fieldGoalsAttempted || 0,
       twoPointsMade: twoPointsMade || 0,
@@ -172,15 +160,12 @@ export const addPlayerStats = asyncHandler(
 
     const newStats = await PlayerStats.create(newStatsData);
 
-    // Add stats to player's history
     player.statsHistory = [
       ...(player.statsHistory || []),
       newStats._id,
     ] as ObjectId[];
     await player.save();
 
-    // Add stats to match
-    // Need to check if match.playerStats exists first
     if (match.playerStats) {
       match.playerStats = [...match.playerStats, newStats._id] as ObjectId[];
     } else {
@@ -195,7 +180,6 @@ export const addPlayerStats = asyncHandler(
   }
 );
 
-// **5️⃣ Update Player Stats**
 export const updatePlayerStats = asyncHandler(
   async (req: Request<{ id: string }>, res: Response) => {
     const { id } = req.params;
@@ -218,7 +202,6 @@ export const updatePlayerStats = asyncHandler(
   }
 );
 
-// **6️⃣ Delete Player Stats**
 export const deletePlayerStats = asyncHandler(
   async (req: Request<{ id: string }>, res: Response) => {
     const { id } = req.params;

@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import { UserDocument, UserModel } from "../types/models/User.js";
 
-// Define user schema
 const userSchema = new mongoose.Schema(
   {
     username: {
@@ -30,10 +29,9 @@ const userSchema = new mongoose.Schema(
       default: "user",
     },
   },
-  { timestamps: true } // Auto-adds createdAt & updatedAt fields
+  { timestamps: true }
 );
 
-// **Hash Password Before Saving**
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   const salt = await bcrypt.genSalt(10);
@@ -41,14 +39,12 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-// **Compare Hashed Password for Login**
 userSchema.methods.matchPassword = async function (
   enteredPassword: string
 ): Promise<boolean> {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-// Create and export the model
 const User = mongoose.model<UserDocument, UserModel>("User", userSchema);
 
 export default User;

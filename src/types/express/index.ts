@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import { ParamsDictionary, Query } from "express-serve-static-core";
 import { UserDocument } from "../models/User.js";
 
-// Extended Express Request with user authentication
 export interface AuthRequest extends Request {
   user?: UserDocument;
   file?: Express.Multer.File;
@@ -13,17 +12,14 @@ export interface AuthRequest extends Request {
     | Express.Multer.File[];
 }
 
-// Custom Parameters interface
 export interface RequestParams {
   [key: string]: string;
 }
 
-// Custom Query interface
 export interface RequestQuery {
   [key: string]: string | string[] | undefined;
 }
 
-// Typed Request with body, params, and query
 export interface TypedRequest<
   T = any,
   P extends ParamsDictionary = ParamsDictionary,
@@ -34,14 +30,12 @@ export interface TypedRequest<
   query: Q;
 }
 
-// Typed Response
 export interface TypedResponse<T = any> extends Response {
   json(body: T): this;
 }
 
 export type NextFunction = (err?: any) => void;
 
-// Helper types for controller parameters
 export type ControllerFunction<
   B = any,
   P extends ParamsDictionary = ParamsDictionary,
@@ -62,7 +56,6 @@ export type ControllerHandler<
   next?: NextFunction
 ) => Promise<any> | void;
 
-// Common param types
 export interface IdParam extends ParamsDictionary {
   id: string;
 }

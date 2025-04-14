@@ -1,17 +1,10 @@
 import Article from "../models/Article.js";
 import APIFeatures from "../utils/apiFeatures.js";
-import { Request, Response } from "express";
-import {
-  TypedRequest,
-  ControllerHandler,
-  IdParam,
-  NextFunction,
-} from "../types/express/index.js";
+import { ControllerHandler, IdParam } from "../types/express/index.js";
 import { AppError } from "../middleware/errorHandler.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { IArticle, ArticleDocument } from "../types/models/Article.js";
 
-// Interface for article creation/update request body
 interface ArticleRequestBody {
   title: string;
   content: string;
@@ -22,15 +15,11 @@ interface ArticleRequestBody {
   images?: string[];
 }
 
-// **1️⃣ Get All Articles**
 export const getArticles: ControllerHandler = asyncHandler(async (req, res) => {
-  // Create a new APIFeatures instance with filtering and sorting
   const features = new APIFeatures(Article.find(), req.query).filter().sort();
 
-  // Apply pagination
   await features.paginate();
 
-  // Apply population if requested
   features.populate();
 
   const articles = await features.query;
@@ -43,7 +32,6 @@ export const getArticles: ControllerHandler = asyncHandler(async (req, res) => {
   });
 });
 
-// **2️⃣ Get a Single Article**
 export const getArticle: ControllerHandler<any, IdParam> = asyncHandler(
   async (req, res) => {
     const article = await Article.findById(req.params.id);
@@ -59,7 +47,6 @@ export const getArticle: ControllerHandler<any, IdParam> = asyncHandler(
   }
 );
 
-// **3️⃣ Create a New Article (Admin Only)**
 export const createArticle: ControllerHandler<ArticleRequestBody> =
   asyncHandler(async (req, res) => {
     const {
@@ -72,7 +59,6 @@ export const createArticle: ControllerHandler<ArticleRequestBody> =
       images,
     } = req.body;
 
-    // Check if article with same title exists
     const articleExists = await Article.findOne({ title });
     if (articleExists) {
       throw new AppError(
@@ -82,7 +68,6 @@ export const createArticle: ControllerHandler<ArticleRequestBody> =
       );
     }
 
-    // Prepare article data
     const articleData: IArticle = {
       title,
       content,
@@ -93,7 +78,6 @@ export const createArticle: ControllerHandler<ArticleRequestBody> =
       images: images || [],
     };
 
-    // Create article with all available fields
     const newArticle = await Article.create(articleData);
 
     res.status(201).json({
@@ -102,14 +86,12 @@ export const createArticle: ControllerHandler<ArticleRequestBody> =
     });
   });
 
-// **4️⃣ Update an Article (Admin Only)**
 export const updateArticle: ControllerHandler<
   Partial<ArticleRequestBody>,
   IdParam
 > = asyncHandler(async (req, res) => {
   const { title } = req.body;
 
-  // If title is being updated, check for duplicates
   if (title) {
     const existingArticle = await Article.findOne({
       title,
@@ -147,7 +129,6 @@ export const updateArticle: ControllerHandler<
   });
 });
 
-// **5️⃣ Delete an Article (Admin Only)**
 export const deleteArticle: ControllerHandler<any, IdParam> = asyncHandler(
   async (req, res) => {
     const article = await Article.findByIdAndDelete(req.params.id);

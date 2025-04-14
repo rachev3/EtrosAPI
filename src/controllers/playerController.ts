@@ -10,7 +10,6 @@ import {
   PlayerPosition,
 } from "../types/models/Player.js";
 
-// Interface for player creation/update request body
 interface PlayerRequestBody {
   name: string;
   number: number;
@@ -22,7 +21,6 @@ interface PlayerRequestBody {
   imageUrl?: string;
 }
 
-// Interface for pagination data in response
 interface PaginationData {
   page: number;
   limit: number;
@@ -30,37 +28,29 @@ interface PaginationData {
   totalResults: number;
 }
 
-// Interface for player list response
 interface PlayersResponse {
   count: number;
   pagination: PaginationData;
   data: PlayerDocument[];
 }
 
-// Interface for single player response
 interface PlayerResponse {
   data: PlayerDocument;
 }
 
-// Interface for delete player response
 interface DeletePlayerResponse {
   message: string;
 }
 
-// **1️⃣ Get All Players**
 export const getPlayers = asyncHandler(async (req: Request, res: Response) => {
-  // Create a new APIFeatures instance with the Player model query and request query
   const features = new APIFeatures(Player.find(), req.query).filter().sort();
 
-  // Apply pagination
   await features.paginate();
 
-  // Apply population if requested
   features.populate();
 
   const players = await features.query;
 
-  // Return response with pagination data
   res.status(200).json({
     success: true,
     count: players.length,
@@ -69,28 +59,22 @@ export const getPlayers = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
-// **2️⃣ Get a Single Player**
 export const getPlayer = asyncHandler(
   async (req: Request<{ id: string }>, res: Response) => {
-    // Create a base query
     let query = Player.findById(req.params.id);
 
-    // Apply population if requested
     if (req.query.populate) {
       const populateFields = (req.query.populate as string).split(",");
 
       populateFields.forEach((field) => {
-        // Check if there's a selection specified with field:selection
         if (field.includes(":")) {
           const [fieldName, selection] = field.split(":");
-          // Convert selection to space-separated string for mongoose
           const select = selection.replace(/;/g, " ");
           query = query.populate({
             path: fieldName,
             select,
           });
         } else {
-          // Simple population without selection
           query = query.populate(field);
         }
       });
@@ -109,7 +93,6 @@ export const getPlayer = asyncHandler(
   }
 );
 
-// **3️⃣ Create a New Player (Admin Only)**
 export const createPlayer = asyncHandler(
   async (req: TypedRequest<PlayerRequestBody>, res: Response) => {
     const {
@@ -123,7 +106,6 @@ export const createPlayer = asyncHandler(
       imageUrl,
     } = req.body;
 
-    // Validate required fields
     if (!name) {
       throw new AppError("Name is required", 400, "MISSING_FIELDS", {
         field: "name",
@@ -142,7 +124,6 @@ export const createPlayer = asyncHandler(
       });
     }
 
-    // Check if player already exists
     const playerExists = await Player.findOne({ name });
     if (playerExists) {
       throw new AppError(
@@ -152,7 +133,6 @@ export const createPlayer = asyncHandler(
       );
     }
 
-    // Create new player
     const playerData: IPlayer = {
       name,
       number,
@@ -172,7 +152,6 @@ export const createPlayer = asyncHandler(
   }
 );
 
-// **4️⃣ Update a Player (Admin Only)**
 export const updatePlayer = asyncHandler(
   async (
     req: TypedRequest<Partial<PlayerRequestBody>, { id: string }>,
@@ -195,7 +174,6 @@ export const updatePlayer = asyncHandler(
   }
 );
 
-// **5️⃣ Delete a Player (Admin Only)**
 export const deletePlayer = asyncHandler(
   async (req: Request<{ id: string }>, res: Response) => {
     const player = await Player.findByIdAndDelete(req.params.id);

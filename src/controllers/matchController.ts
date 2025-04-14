@@ -11,9 +11,7 @@ import {
   TeamStats,
 } from "../types/models/Match.js";
 import { ObjectId } from "../types/index.js";
-import { PopulateOptions } from "mongoose";
 
-// Interface for match creation/update request body
 interface MatchRequestBody {
   opponent: string;
   date: string | Date;
@@ -26,15 +24,11 @@ interface MatchRequestBody {
   playerStats?: string[] | ObjectId[];
 }
 
-// **1️⃣ Get All Matches**
 export const getMatches = asyncHandler(async (req: Request, res: Response) => {
-  // Create a new APIFeatures instance with filtering and sorting
   const features = new APIFeatures(Match.find(), req.query).filter().sort();
 
-  // Apply pagination
   await features.paginate();
 
-  // Apply population if requested
   features.populate();
 
   const matches = await features.query;
@@ -47,38 +41,29 @@ export const getMatches = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
-// **2️⃣ Get a Single Match**
 export const getMatch = asyncHandler(
   async (req: Request<{ id: string }>, res: Response) => {
     const { id } = req.params;
 
-    // Create a base query
     let query = Match.findById(id);
 
-    // Apply population if requested
     if (req.query.populate) {
       const populateFields = (req.query.populate as string).split(",");
 
-      // Create a structured object to hold nested population options
       const populateOptions: Record<string, any> = {};
 
       populateFields.forEach((field) => {
-        // Case 1: Field with selection specified (field:selection)
         if (field.includes(":")) {
           const [fieldName, selection] = field.split(":");
-          // Convert selection to space-separated string for mongoose
           const select = selection.replace(/;/g, " ");
           query = query.populate({
             path: fieldName,
             select,
           });
-        }
-        // Case 2: Field with dot notation for nested population (field.nestedField)
-        else if (field.includes(".")) {
+        } else if (field.includes(".")) {
           const parts = field.split(".");
           let currentPath = parts[0];
 
-          // Initialize the path in our options object if it doesn't exist
           if (!populateOptions[currentPath]) {
             populateOptions[currentPath] = {
               path: currentPath,
@@ -86,13 +71,9 @@ export const getMatch = asyncHandler(
             };
           }
 
-          // Simple one-level nesting (e.g., field1.field2)
           if (parts.length === 2) {
             populateOptions[currentPath].populate = { path: parts[1] };
-          }
-          // More complex nesting - simplified approach
-          else if (parts.length > 2) {
-            // For simplicity, just handle direct path to avoid type issues
+          } else if (parts.length > 2) {
             query = query.populate({
               path: parts[0],
               populate: {
@@ -100,14 +81,11 @@ export const getMatch = asyncHandler(
               },
             });
           }
-        }
-        // Case 3: Simple field without nesting or selection
-        else {
+        } else {
           query = query.populate(field);
         }
       });
 
-      // Apply all structured nested populate options
       Object.values(populateOptions).forEach((option) => {
         query = query.populate(option);
       });
@@ -126,7 +104,6 @@ export const getMatch = asyncHandler(
   }
 );
 
-// **3️⃣ Create a New Match (Admin Only)**
 export const createMatch = asyncHandler(
   async (req: TypedRequest<MatchRequestBody>, res: Response) => {
     const {
@@ -139,7 +116,6 @@ export const createMatch = asyncHandler(
       playerStats,
     } = req.body;
 
-    // Determine result based on provided scores
     let result: MatchResult = "Pending";
     if (
       ourScore !== null &&
@@ -155,7 +131,6 @@ export const createMatch = asyncHandler(
           : "Pending";
     }
 
-    // Ensure `teamStats` is properly structured or use default values
     const defaultTeamStats: TeamStats = {
       fieldGoalsMade: 0,
       fieldGoalsAttempted: 0,
@@ -176,13 +151,11 @@ export const createMatch = asyncHandler(
       points: 0,
     };
 
-    // Merge provided `teamStats` with defaults (if missing fields)
     const finalTeamStats: TeamStats = {
       ...defaultTeamStats,
       ...(teamStats || {}),
     };
 
-    // Create match data
     const matchData: IMatch = {
       opponent,
       date: new Date(date),
@@ -195,7 +168,6 @@ export const createMatch = asyncHandler(
       playerStats: playerStats || [],
     };
 
-    // Create match
     const newMatch = await Match.create(matchData);
 
     res.status(201).json({
@@ -205,13 +177,11 @@ export const createMatch = asyncHandler(
   }
 );
 
-// **4️⃣ Update Match Result (Admin Only)**
 export const updateMatch = asyncHandler(
   async (req: Request<{ id: string }>, res: Response) => {
     const { id } = req.params;
     const updateData = req.body;
 
-    // When updating match result, ensure scores are set
     if (updateData.result && updateData.result !== "Pending") {
       if (
         updateData.ourScore === undefined ||
@@ -225,7 +195,6 @@ export const updateMatch = asyncHandler(
       }
     }
 
-    // Allow manual updates for all fields including team statistics
     const updatedMatch = await Match.findByIdAndUpdate(id, updateData, {
       new: true,
     });
@@ -241,12 +210,10 @@ export const updateMatch = asyncHandler(
   }
 );
 
-// Helper function to update team stats after a match
 const updateStatsAfterMatch = async (
   match: MatchDocument
 ): Promise<boolean> => {
   try {
-    // Populate playerStats to access all the individual player statistics
     const populatedMatch = await Match.findById(match._id).populate(
       "playerStats"
     );
@@ -260,7 +227,6 @@ const updateStatsAfterMatch = async (
       return false;
     }
 
-    // Initialize team stats object with zeros
     const teamStats: TeamStats = {
       fieldGoalsMade: 0,
       fieldGoalsAttempted: 0,
@@ -281,7 +247,6 @@ const updateStatsAfterMatch = async (
       points: 0,
     };
 
-    // Aggregate all player stats into team stats
     populatedMatch.playerStats.forEach((playerStat: any) => {
       teamStats.fieldGoalsMade += playerStat.fieldGoalsMade || 0;
       teamStats.fieldGoalsAttempted += playerStat.fieldGoalsAttempted || 0;
@@ -299,11 +264,9 @@ const updateStatsAfterMatch = async (
       teamStats.blocks += playerStat.blocks || 0;
       teamStats.turnovers += playerStat.turnovers || 0;
       teamStats.fouls += playerStat.fouls || 0;
-      // Replace totalPoints with points to match the TeamStats interface
       teamStats.points += playerStat.points || 0;
     });
 
-    // Update match with aggregated team stats
     await Match.findByIdAndUpdate(match._id, { teamStats });
 
     console.log("Match stats updated successfully");
@@ -314,7 +277,6 @@ const updateStatsAfterMatch = async (
   }
 };
 
-// **5️⃣ Delete a Match (Admin Only)**
 export const deleteMatch = asyncHandler(
   async (req: Request<{ id: string }>, res: Response) => {
     const { id } = req.params;

@@ -26,11 +26,11 @@ const articleSchema = new mongoose.Schema(
       trim: true,
     },
     metaKeywords: {
-      type: [String], // Array of keywords
+      type: [String],
       default: [],
     },
     images: {
-      type: [String], // Array of image URLs
+      type: [String],
       default: [],
     },
   },

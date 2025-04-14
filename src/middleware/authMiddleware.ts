@@ -9,17 +9,14 @@ import { AuthRequest } from "../types/express/index.js";
 
 dotenv.config();
 
-// **Middleware to verify JWT and authenticate user**
 export const protect = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     let token: string | undefined;
 
-    // Check if Authorization header exists and starts with "Bearer"
     if (
       req.headers.authorization &&
       req.headers.authorization.startsWith("Bearer")
     ) {
-      // Extract token from the header
       token = req.headers.authorization.split(" ")[1];
 
       if (!token) {
@@ -31,13 +28,11 @@ export const protect = asyncHandler(
       }
 
       try {
-        // Verify JWT
         const decoded = jwt.verify(
           token,
           process.env.JWT_SECRET as string
         ) as JwtPayload;
 
-        // Find the user
         const user = await User.findById(decoded.id);
 
         if (!user) {
@@ -48,7 +43,6 @@ export const protect = asyncHandler(
           );
         }
 
-        // Attach user object to request
         (req as AuthRequest).user = user;
         next();
       } catch (error) {
@@ -66,7 +60,7 @@ export const protect = asyncHandler(
               "TOKEN_EXPIRED"
             );
           } else {
-            throw error; // Pass other errors to the global error handler
+            throw error;
           }
         } else {
           throw new AppError(
@@ -82,7 +76,6 @@ export const protect = asyncHandler(
   }
 );
 
-// **Middleware to check if the user is an admin**
 export const isAdmin = (
   req: Request,
   res: Response,
@@ -106,5 +99,5 @@ export const isAdmin = (
     );
   }
 
-  next(); // User is admin, proceed
+  next();
 };

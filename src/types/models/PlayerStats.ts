@@ -4,8 +4,6 @@ import { Model } from "mongoose";
 export interface IPlayerStats {
   match: ObjectId | string;
   player: ObjectId | string;
-
-  // Individual player performance
   fieldGoalsMade: number;
   fieldGoalsAttempted: number;
   twoPointsMade: number;

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { ErrorCode } from "../types/index";
+import { ENV } from "../config/env";
 
 interface MongooseError extends Error {
   code?: number;
@@ -114,7 +115,7 @@ const errorHandler = (
     message,
     errorCode,
     ...(errorDetails && { details: errorDetails }),
-    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
+    ...(ENV.NODE_ENV === "development" && { stack: err.stack }),
   });
 };
 

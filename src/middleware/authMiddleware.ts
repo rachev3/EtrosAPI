@@ -6,6 +6,7 @@ import { AppError } from "./errorHandler";
 import asyncHandler from "../utils/asyncHandler";
 import { JwtPayload } from "../types/index";
 import { AuthRequest } from "../types/express/index";
+import { ENV } from "../config/env";
 
 dotenv.config();
 
@@ -28,10 +29,7 @@ export const protect = asyncHandler(
       }
 
       try {
-        const decoded = jwt.verify(
-          token,
-          process.env.JWT_SECRET as string
-        ) as JwtPayload;
+        const decoded = jwt.verify(token, ENV.JWT_SECRET) as JwtPayload;
 
         const user = await User.findById(decoded.id);
 

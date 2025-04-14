@@ -1,8 +1,9 @@
 import app from "./app";
 import connectDB from "./config/db";
 import { Server } from "http";
+import { ENV } from "./config/env";
 
-const PORT: number = parseInt(process.env.PORT || "5000", 10);
+const PORT: number = ENV.PORT;
 
 // Connect to MongoDB
 connectDB()

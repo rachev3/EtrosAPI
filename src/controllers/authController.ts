@@ -3,7 +3,6 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import asyncHandler from "../utils/asyncHandler";
 import { AppError } from "../middleware/errorHandler";
-import { Response } from "express";
 import {
   AuthRequest,
   TypedRequest,
@@ -11,6 +10,7 @@ import {
 } from "../types/express/index";
 import { ApiResponse } from "../types/index";
 import { IUser, UserRole, UserDocument } from "../types/models/User";
+import { ENV } from "../config/env";
 
 dotenv.config();
 
@@ -43,7 +43,7 @@ interface UserProfileResponse {
 }
 
 const generateToken = (userId: string): string => {
-  return jwt.sign({ id: userId }, process.env.JWT_SECRET as string, {
+  return jwt.sign({ id: userId }, ENV.JWT_SECRET, {
     expiresIn: "1d",
   });
 };

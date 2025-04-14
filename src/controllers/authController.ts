@@ -10,7 +10,7 @@ import {
   TypedResponse,
 } from "../types/express/index.js";
 import { ApiResponse } from "../types/index.js";
-import { IUser, UserRole } from "../types/models/User.js";
+import { IUser, UserRole, UserDocument } from "../types/models/User.js";
 
 dotenv.config();
 
@@ -46,6 +46,16 @@ const generateToken = (userId: string): string => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET as string, {
     expiresIn: "1d",
   });
+};
+
+const formatUserResponse = (user: UserDocument): UserResponseData => {
+  return {
+    _id: user._id.toString(),
+    username: user.username,
+    email: user.email,
+    role: user.role,
+    token: generateToken(user._id.toString()),
+  };
 };
 
 export const registerUser = asyncHandler(
@@ -88,13 +98,7 @@ export const registerUser = asyncHandler(
 
     res.status(201).json({
       success: true,
-      data: {
-        _id: user._id.toString(),
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        token: generateToken(user._id.toString()),
-      },
+      data: formatUserResponse(user),
     });
   }
 );
@@ -114,7 +118,7 @@ export const loginUser = asyncHandler(
       );
     }
 
-    const user = await User.findOne({ email });
+    const user = await (User.findOne({ email }) as any).select("+password");
 
     if (!user) {
       throw new AppError(
@@ -135,13 +139,7 @@ export const loginUser = asyncHandler(
 
     res.json({
       success: true,
-      data: {
-        _id: user._id.toString(),
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        token: generateToken(user._id.toString()),
-      },
+      data: formatUserResponse(user),
     });
   }
 );
@@ -159,8 +157,7 @@ export const getUserProfile = asyncHandler(
       );
     }
 
-    const userId = req.user._id.toString();
-    const user = await User.findById(userId);
+    const user = await User.findById(req.user._id.toString());
 
     if (!user) {
       throw new AppError("User not found", 404, "USER_NOT_FOUND");

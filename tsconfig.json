@@ -2,20 +2,17 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "esModuleInterop": true,
-    "strict": true,
     "outDir": "./dist",
     "rootDir": "./src",
-    "resolveJsonModule": true,
-    "sourceMap": true,
+    "strict": true,
     "declaration": true,
-    "noImplicitAny": false,
     "skipLibCheck": true,
+
     "allowSyntheticDefaultImports": true,
-    "strictNullChecks": false,
-    "noImplicitThis": false,
-    "alwaysStrict": false
+    "strictNullChecks": true,
+    "noImplicitThis": true,
+    "noImplicitAny": true,
+    "resolveJsonModule": true
   },
   "ts-node": {
     "esm": true,

@@ -1,27 +1,32 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
-import { UserDocument, UserModel } from "../types/models/User.js";
+import { IUser, UserDocument, UserModel } from "../types/models/User.js";
 
-const userSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema<UserDocument, UserModel>(
   {
     username: {
       type: String,
-      required: true,
-      unique: true,
+      required: [true, "Username is required"],
       trim: true,
+      minlength: [3, "Username must be at least 3 characters long"],
+      maxlength: [30, "Username cannot exceed 30 characters"],
     },
     email: {
       type: String,
-      required: true,
+      required: [true, "Email is required"],
       unique: true,
       trim: true,
       lowercase: true,
-      match: [/.+\@.+\..+/, "Please enter a valid email address"],
+      match: [
+        /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/,
+        "Please enter a valid email address",
+      ],
     },
     password: {
       type: String,
-      required: true,
-      minlength: 6,
+      required: [true, "Password is required"],
+      minlength: [6, "Password must be at least 6 characters long"],
+      select: false,
     },
     role: {
       type: String,
@@ -29,19 +34,24 @@ const userSchema = new mongoose.Schema(
       default: "user",
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
+// Hash password before saving
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+  if (!this.isModified("password")) {
+    next();
+    return;
+  }
+
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-  next();
 });
 
-userSchema.methods.matchPassword = async function (
-  enteredPassword: string
-): Promise<boolean> {
+// Match entered password with hashed password
+userSchema.methods.matchPassword = async function (enteredPassword: string) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
